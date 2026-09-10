@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learnora — Study with a tutor who explains, not just answers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+
+<style>
+:root{
+  --ink:#16261C;
+  --ink-soft:#1E3327;
+  --forest:#2F5233;
+  --forest-light:#3E6A45;
+  --amber:#D98E3F;
+  --amber-dark:#B9722B;
+  --paper:#FAF6EC;
+  --paper-card:#FFFFFF;
+  --rule:#E4DCC8;
+  --text:#20281F;
+  --muted:#6B7264;
+  --muted-on-ink:#B9C4B4;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+
+html{scroll-behavior:smooth;}
+
+body{
+  font-family:'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  background:var(--paper);
+  color:var(--text);
+  line-height:1.5;
+}
+
+h1,h2,h3,.serif{font-family:'Source Serif 4', Georgia, serif;}
+
+button,textarea,input{font:inherit;color:inherit;}
+button{cursor:pointer;border:0;background:none;}
+:focus-visible{outline:2px solid var(--amber-dark);outline-offset:3px;}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.001ms !important; transition-duration:.001ms !important;}
+}
+
+/* ---------- NAV ---------- */
+.nav{
+  background:var(--ink);
+  color:#fff;
+  height:72px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 6%;
+  position:sticky;
+  top:0;
+  z-index:30;
+}
+
+.logo{display:flex;align-items:center;gap:10px;font-weight:600;font-size:19px;letter-spacing:-.2px;}
+
+.logo-mark{
+  width:34px;height:34px;border-radius:9px;
+  background:var(--amber);
+  display:grid;place-items:center;
+  color:var(--ink);
+  font-family:'Source Serif 4',serif;
+  font-weight:700;
+  font-size:18px;
+}
+
+.nav-right{display:flex;align-items:center;gap:14px;}
+
+.streak{
+  background:rgba(217,142,63,.16);
+  color:var(--amber);
+  border:1px solid rgba(217,142,63,.35);
+  padding:6px 12px;
+  border-radius:999px;
+  font-size:13px;
+  font-weight:600;
+}
+
+.avatar-wrap{position:relative;}
+
+.avatar{
+  width:34px;height:34px;border-radius:50%;
+  background:var(--forest-light);
+  display:grid;place-items:center;
+  font-weight:600;font-size:14px;
+  border:1px solid rgba(255,255,255,.2);
+  cursor:pointer;
+}
+.avatar:hover{border-color:var(--amber);}
+
+.avatar-menu{
+  display:none;
+  position:absolute;
+  top:44px;
+  right:0;
+  background:var(--paper-card);
+  color:var(--text);
+  border:1px solid var(--rule);
+  border-radius:10px;
+  min-width:180px;
+  padding:6px;
+  box-shadow:0 16px 36px rgba(0,0,0,.25);
+  z-index:40;
+}
+.avatar-menu.show{display:block;}
+
+.avatar-menu-email{
+  padding:8px 10px;
+  font-size:12.5px;
+  color:var(--muted);
+  border-bottom:1px solid var(--rule);
+  margin-bottom:6px;
+  word-break:break-all;
+}
+
+.avatar-menu button{
+  width:100%;
+  text-align:left;
+  padding:8px 10px;
+  border-radius:7px;
+  font-size:13.5px;
+  font-weight:500;
+}
+.avatar-menu button:hover{background:#F1F0E8;}
+
+/* ---------- HERO ---------- */
+.hero{
+  background:var(--ink);
+  color:#fff;
+  padding:64px 6% 90px;
+}
+
+.hero-inner{
+  width:min(1180px,100%);
+  margin:0 auto;
+  display:grid;
+  grid-template-columns:1.1fr .9fr;
+  gap:56px;
+  align-items:center;
+}
+
+.eyebrow{
+  display:inline-block;
+  font-size:13px;
+  color:var(--muted-on-ink);
+  border-left:2px solid var(--amber);
+  padding-left:10px;
+  margin-bottom:22px;
+}
+
+.hero h1{
+  font-size:clamp(34px,4.6vw,54px);
+  line-height:1.08;
+  font-weight:600;
+  letter-spacing:-.5px;
+  max-width:12ch;
+}
+
+.hero h1 u{
+  text-decoration:none;
+  background:linear-gradient(transparent 62%, rgba(217,142,63,.55) 0);
+}
+
+.hero p{
+  margin-top:20px;
+  max-width:46ch;
+  color:var(--muted-on-ink);
+  font-size:16.5px;
+}
+
+.hero-cta{
+  margin-top:32px;
+  display:flex;
+  gap:14px;
+  align-items:center;
+}
+
+.btn-primary{
+  background:var(--amber);
+  color:var(--ink);
+  font-weight:600;
+  padding:13px 22px;
+  border-radius:10px;
+  font-size:15px;
+}
+.btn-primary:hover{background:#e6a15a;}
+
+.btn-ghost{
+  color:#fff;
+  font-weight:500;
+  font-size:14px;
+  padding:13px 6px;
+  border-bottom:1px solid rgba(255,255,255,.35);
+}
+.btn-ghost:hover{border-color:#fff;}
+
+/* hero preview card */
+.hero-card{
+  background:var(--paper-card);
+  border-radius:16px;
+  padding:22px;
+  color:var(--text);
+  box-shadow:0 30px 60px rgba(0,0,0,.35);
+  transform:rotate(1.2deg);
+}
+
+.hero-card-line{
+  height:1px;
+  background:var(--rule);
+  margin:14px 0;
+}
+
+.hero-card-row{display:flex;gap:10px;align-items:flex-start;margin-bottom:12px;}
+
+.hero-tag{
+  font-size:11px;
+  font-weight:600;
+  color:var(--forest);
+  background:#EAF1EA;
+  border-radius:6px;
+  padding:3px 8px;
+  display:inline-block;
+  margin-bottom:10px;
+}
+
+.hero-card p{color:var(--text);font-size:14px;line-height:1.6;max-width:none;}
+.hero-card strong{color:var(--forest);}
+
+/* ---------- MAIN ---------- */
+main{width:min(1180px,92%);margin:0 auto;padding:60px 0 90px;}
+
+.section-title{
+  font-size:14px;
+  font-weight:600;
+  color:var(--muted);
+  margin-bottom:16px;
+  display:flex;
+  align-items:baseline;
+  gap:10px;
+}
+.section-title::after{
+  content:"";
+  height:1px;
+  flex:1;
+  background:var(--rule);
+}
+
+/* SUBJECT TABS */
+.subjects{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+}
+
+.subject{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:12px 18px;
+  border-radius:12px 12px 0 0;
+  background:transparent;
+  border:1px solid transparent;
+  color:var(--muted);
+  font-weight:500;
+  font-size:14.5px;
+  transition:background .15s, color .15s;
+}
+
+.subject:hover{color:var(--text);}
+
+.subject.active{
+  background:var(--paper-card);
+  color:var(--forest);
+  font-weight:600;
+  border:1px solid var(--rule);
+  border-bottom-color:var(--paper-card);
+  margin-bottom:-1px;
+}
+
+.subject-icon{font-size:17px;}
+
+/* TUTOR */
+.tutor{
+  background:var(--paper-card);
+  border:1px solid var(--rule);
+  border-radius:0 14px 14px 14px;
+  padding:28px;
+  box-shadow:0 20px 45px rgba(31,45,33,.07);
+  margin-bottom:56px;
+}
+
+.tutor-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:20px;
+  padding-bottom:18px;
+  border-bottom:1px solid var(--rule);
+  margin-bottom:18px;
+}
+
+.tutor-title{display:flex;gap:13px;align-items:center;}
+
+.ai-icon{
+  width:42px;height:42px;border-radius:11px;
+  background:var(--forest);
+  color:#fff;
+  display:grid;place-items:center;
+  font-family:'Source Serif 4',serif;
+  font-size:19px;
+}
+
+.tutor-title h2{font-size:18px;font-weight:600;}
+.tutor-title p{font-size:13px;color:var(--muted);margin-top:2px;}
+
+.mode-buttons{display:flex;gap:20px;}
+
+.mode{
+  padding:6px 2px;
+  font-size:13.5px;
+  font-weight:500;
+  color:var(--muted);
+  border-bottom:2px solid transparent;
+}
+
+.mode.active{color:var(--forest);border-bottom-color:var(--amber);font-weight:600;}
+
+.chat{
+  min-height:220px;
+  max-height:380px;
+  overflow-y:auto;
+  padding:6px 2px 16px;
+}
+
+.message{display:flex;margin:14px 0;gap:10px;}
+.message.user{justify-content:flex-end;}
+
+.bubble{
+  max-width:76%;
+  padding:13px 16px;
+  border-radius:14px;
+  font-size:14.3px;
+  line-height:1.6;
+  background:#F1F0E8;
+  border:1px solid var(--rule);
+}
+
+.message.user .bubble{
+  background:var(--forest);
+  color:#fff;
+  border:0;
+  border-bottom-right-radius:4px;
+}
+.message.ai .bubble{border-bottom-left-radius:4px;}
+.message.ai .bubble strong{color:var(--forest-light);}
+.message.user .bubble strong{color:#EAF1EA;}
+
+.input-area{
+  border:1px solid var(--rule);
+  border-radius:14px;
+  padding:10px;
+  background:var(--paper);
+}
+
+textarea{
+  width:100%;
+  min-height:74px;
+  resize:none;
+  border:0;
+  outline:none;
+  background:transparent;
+  padding:8px;
+}
+
+.input-bottom{display:flex;justify-content:space-between;align-items:center;padding:0 4px;}
+
+.safe-note{font-size:11.5px;color:var(--muted);}
+
+.send{
+  background:var(--forest);
+  color:#fff;
+  padding:11px 20px;
+  border-radius:10px;
+  font-weight:600;
+  font-size:14px;
+}
+.send:hover{background:var(--forest-light);}
+
+/* GAME PANEL */
+.game-panel{
+  display:none;
+  margin-top:18px;
+  padding:24px;
+  border-radius:14px;
+  background:var(--ink);
+  color:#fff;
+}
+.game-panel.show{display:block;}
+
+.game-header{display:flex;justify-content:space-between;align-items:center;}
+.game-header h3{font-size:16px;font-weight:600;}
+
+.xp{
+  background:rgba(217,142,63,.18);
+  color:var(--amber);
+  padding:6px 12px;
+  border-radius:999px;
+  font-weight:600;
+  font-size:12.5px;
+  border:1px solid rgba(217,142,63,.35);
+}
+
+.game-question{
+  text-align:center;
+  margin:28px 0;
+  font-size:23px;
+  font-family:'Source Serif 4',serif;
+  font-weight:600;
+}
+
+.game-options{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+
+.game-option{
+  padding:14px;
+  border-radius:10px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.16);
+  color:#fff;
+  font-weight:500;
+}
+.game-option:hover{border-color:var(--amber);}
+
+/* FEATURES */
+.features{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:0;
+  border-top:1px solid var(--rule);
+}
+
+.feature{
+  padding:26px 24px 26px 0;
+  border-right:1px solid var(--rule);
+}
+.feature:last-child{border-right:0;}
+.feature:not(:first-child){padding-left:24px;}
+
+.feature-num{
+  font-family:'IBM Plex Mono', monospace;
+  font-size:12px;
+  color:var(--amber-dark);
+  margin-bottom:10px;
+  display:block;
+}
+
+.feature h3{font-size:16px;font-weight:600;margin-bottom:8px;}
+.feature p{color:var(--muted);font-size:13.8px;line-height:1.6;}
+
+/* FOOTER */
+footer{
+  background:var(--ink);
+  color:var(--muted-on-ink);
+  padding:26px 6%;
+  font-size:13px;
+  display:flex;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:8px;
+}
+footer strong{color:#fff;font-weight:600;}
+
+/* ---------- RESPONSIVE ---------- */
+@media(max-width:900px){
+  .hero-inner{grid-template-columns:1fr;}
+  .hero-card{transform:none;order:-1;}
+  .features{grid-template-columns:1fr;}
+  .feature{border-right:0;border-bottom:1px solid var(--rule);padding:22px 0;}
+  .feature:not(:first-child){padding-left:0;}
+  .tutor-top{flex-direction:column;align-items:flex-start;gap:14px;}
+}
+
+@media(max-width:560px){
+  .nav{padding:0 4%;}
+  .streak{display:none;}
+  main{width:94%;}
+  .hero{padding:44px 5% 60px;}
+  .subjects{gap:4px;}
+  .subject{padding:10px 12px;font-size:13px;}
+  .subject-icon{font-size:15px;}
+  .mode-buttons{gap:12px;overflow-x:auto;}
+  .game-options{grid-template-columns:1fr;}
+  footer{flex-direction:column;text-align:left;}
+}
+</style>
+</head>
+
+<body>
+
+<nav class="nav">
+  <div class="logo">
+    <div class="logo-mark">L</div>
+    Learnora
+  </div>
+  <div class="nav-right">
+    <div class="streak" id="streakBadge">— day streak</div>
+    <div class="avatar-wrap">
+      <button class="avatar" id="avatarBtn">•</button>
+      <div class="avatar-menu" id="avatarMenu">
+        <div class="avatar-menu-email" id="avatarEmail">Loading…</div>
+        <button onclick="signOut()">Sign out</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="eyebrow">Built by Itzyathu</div>
+      <h1>Understand it.<br>Don't just <u>copy it.</u></h1>
+      <p>Learnora walks you through homework step by step — hints before answers, practice before quizzes, and a quick game when you want the reps to feel less like a chore.</p>
+      <div class="hero-cta">
+        <button class="btn-primary" onclick="document.getElementById('tutor').scrollIntoView()">Start a session</button>
+        <button class="btn-ghost" onclick="document.getElementById('features').scrollIntoView()">See how it works</button>
+      </div>
+    </div>
+
+    <div class="hero-card">
+      <span class="hero-tag">Math · Learn mode</span>
+      <div class="hero-card-row">
+        <p>What's the derivative of x³ + 2x?</p>
+      </div>
+      <div class="hero-card-line"></div>
+      <div class="hero-card-row">
+        <p><strong>Learnora:</strong> Before I show you — which rule handles a power like x³? Once you name it, we'll apply it together.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<main>
+
+<div class="section-title">What are you studying</div>
+
+<section class="subjects" id="subjects">
+  <button class="subject active" onclick="selectSubject(this,'Math')">
+    <span class="subject-icon">📐</span><span>Math</span>
+  </button>
+  <button class="subject" onclick="selectSubject(this,'Science')">
+    <span class="subject-icon">🔬</span><span>Science</span>
+  </button>
+  <button class="subject" onclick="selectSubject(this,'English')">
+    <span class="subject-icon">📖</span><span>English</span>
+  </button>
+  <button class="subject" onclick="selectSubject(this,'History')">
+    <span class="subject-icon">🌎</span><span>History</span>
+  </button>
+  <button class="subject" onclick="selectSubject(this,'Languages')">
+    <span class="subject-icon">🗣️</span><span>Languages</span>
+  </button>
+  <button class="subject" onclick="selectSubject(this,'Other')">
+    <span class="subject-icon">🧠</span><span>Other</span>
+  </button>
+</section>
+
+<section class="tutor" id="tutor">
+
+  <div class="tutor-top">
+    <div class="tutor-title">
+      <div class="ai-icon">L</div>
+      <div>
+        <h2>Learnora Tutor</h2>
+        <p id="subjectLabel">Ready to help with Math</p>
+      </div>
+    </div>
+
+    <div class="mode-buttons">
+      <button class="mode active" onclick="setMode(this,'Learn')">Learn</button>
+      <button class="mode" onclick="setMode(this,'Practice')">Practice</button>
+      <button class="mode" onclick="setMode(this,'Game')">Game</button>
+      <button class="mode" onclick="setMode(this,'Quiz')">Quiz</button>
+    </div>
+  </div>
+
+  <div class="chat" id="chat">
+    <div class="message ai">
+      <div class="bubble">
+        Hey, I'm Learnora. Tell me what you're working on and I'll help you understand it step by step.
+        <br><br>
+        <strong>Tip:</strong> ask for a hint instead of the answer if you want to solve it yourself.
+      </div>
+    </div>
+  </div>
+
+  <div class="input-area">
+    <textarea id="question" placeholder="Ask Learnora about your homework..." onkeydown="handleKey(event)"></textarea>
+    <div class="input-bottom">
+      <div class="safe-note">Learnora is built for safe, on-topic studying.</div>
+      <button class="send" onclick="sendMessage()">Ask Learnora</button>
+    </div>
+  </div>
+
+  <div class="game-panel" id="gamePanel">
+    <div class="game-header">
+      <h3>Fraction Quest</h3>
+      <div class="xp" id="xpCounter">120 XP</div>
+    </div>
+    <div class="game-question">What is 1/2 + 1/4?</div>
+    <div class="game-options">
+      <button class="game-option" onclick="gameAnswer(this,false)">1/3</button>
+      <button class="game-option" onclick="gameAnswer(this,true)">3/4</button>
+      <button class="game-option" onclick="gameAnswer(this,false)">2/6</button>
+      <button class="game-option" onclick="gameAnswer(this,false)">1</button>
+    </div>
+  </div>
+
+</section>
+
+<div class="section-title" id="features">Why students stick with it</div>
+
+<section class="features">
+  <div class="feature">
+    <span class="feature-num">01</span>
+    <h3>Guides, doesn't hand over answers</h3>
+    <p>Explanations, hints, and worked examples build understanding instead of just filling in a blank.</p>
+  </div>
+  <div class="feature">
+    <span class="feature-num">02</span>
+    <h3>Games when you want them</h3>
+    <p>Turn a topic into a quick quest, quiz, or practice round — entirely optional, never required.</p>
+  </div>
+  <div class="feature">
+    <span class="feature-num">03</span>
+    <h3>Built for students</h3>
+    <p>Stays focused on safe, age-appropriate homework help instead of open-ended chat.</p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div><strong>Learnora</strong> — an Itzyathu product</div>
+  <div>Developer: Yatharth G. Bochare</div>
+</footer>
+
+<script>
+
+let currentSubject = "Math";
+let currentMode = "Learn";
+let xp = 120;
+let currentUser = null;
+
+// ---- Auth guard + profile load ----
+(async function initAuth(){
+  const { data: { session } } = await supabaseClient.auth.getSession();
+
+  if(!session){
+    window.location.href = "learnora-signin.html";
+    return;
+  }
+
+  currentUser = session.user;
+
+  const { data: profile } = await supabaseClient
+    .from("profiles")
+    .select("name, email, streak, xp")
+    .eq("id", currentUser.id)
+    .single();
+
+  const displayName = profile?.name || currentUser.email;
+  const initial = displayName.trim().charAt(0).toUpperCase();
+
+  document.getElementById("avatarBtn").textContent = initial;
+  document.getElementById("avatarEmail").textContent = currentUser.email;
+  document.getElementById("streakBadge").textContent =
+    (profile?.streak ?? 0) + " day streak";
+
+  if(profile?.xp != null){
+    xp = profile.xp;
+    document.getElementById("xpCounter").textContent = xp + " XP";
+  }
+})();
+
+document.getElementById("avatarBtn").addEventListener("click", function(){
+  document.getElementById("avatarMenu").classList.toggle("show");
+});
+
+document.addEventListener("click", function(e){
+  const menu = document.getElementById("avatarMenu");
+  const btn = document.getElementById("avatarBtn");
+  if(!menu.contains(e.target) && e.target !== btn){
+    menu.classList.remove("show");
+  }
+});
+
+async function signOut(){
+  await supabaseClient.auth.signOut();
+  window.location.href = "learnora-signin.html";
+}
+
+function selectSubject(button, subject){
+  document.querySelectorAll(".subject").forEach(x => x.classList.remove("active"));
+  button.classList.add("active");
+  currentSubject = subject;
+  document.getElementById("subjectLabel").textContent = "Ready to help with " + subject;
+}
+
+function setMode(button, mode){
+  document.querySelectorAll(".mode").forEach(x => x.classList.remove("active"));
+  button.classList.add("active");
+  currentMode = mode;
+
+  const game = document.getElementById("gamePanel");
+  if(mode === "Game"){
+    game.classList.add("show");
+  } else {
+    game.classList.remove("show");
+  }
+}
+
+function handleKey(event){
+  if(event.key === "Enter" && !event.shiftKey){
+    event.preventDefault();
+    sendMessage();
+  }
+}
+
+function sendMessage(){
+  const input = document.getElementById("question");
+  const text = input.value.trim();
+  if(!text) return;
+
+  addMessage(text, "user");
+  input.value = "";
+
+  setTimeout(() => {
+    const response = generateDemoResponse(text);
+    addMessage(response, "ai");
+  }, 550);
+}
+
+function addMessage(text, type){
+  const chat = document.getElementById("chat");
+  const message = document.createElement("div");
+  message.className = "message " + type;
+
+  const bubble = document.createElement("div");
+  bubble.className = "bubble";
+  bubble.innerHTML = text;
+
+  message.appendChild(bubble);
+  chat.appendChild(message);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function generateDemoResponse(text){
+  const lower = text.toLowerCase();
+
+  const unsafeTerms = ["porn","sexual","weapon","drug","suicide","self harm"];
+
+  if(unsafeTerms.some(term => lower.includes(term))){
+    return `
+      <strong>Learnora is for studying only.</strong><br><br>
+      I can't help with that topic. Ask me about homework, revision, or another
+      school subject instead.
+    `;
+  }
+
+  if(currentMode === "Practice"){
+    return `
+      <strong>Practice mode.</strong><br><br>
+      Let's practice <strong>${currentSubject}</strong>. I'll give you a similar
+      problem first, then we'll check your answer together.
+    `;
+  }
+
+  if(currentMode === "Quiz"){
+    return `
+      <strong>Quiz mode.</strong><br><br>
+      Here's your first question about <strong>${currentSubject}</strong>:
+      <br><br>
+      What's one important idea you remember about this topic?
+    `;
+  }
+
+  return `
+    <strong>Let's work through it.</strong><br><br>
+    You asked about <strong>${currentSubject}</strong>. Instead of the answer
+    right away, I'll break this into smaller steps.
+    <br><br>
+    <strong>First:</strong> which part is tripping you up?
+  `;
+}
+
+async function gameAnswer(button, correct){
+  if(correct){
+    button.textContent = "Correct — +25 XP";
+    xp += 25;
+    document.getElementById("xpCounter").textContent = xp + " XP";
+
+    if(currentUser){
+      await supabaseClient.from("profiles").update({ xp }).eq("id", currentUser.id);
+    }
+  } else {
+    const original = button.textContent;
+    button.textContent = "Try again";
+    setTimeout(() => { button.textContent = original; }, 900);
+  }
+}
+
+</script>
+
+</body>
+</html>
