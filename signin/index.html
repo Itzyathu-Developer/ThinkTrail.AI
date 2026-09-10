@@ -37,14 +37,16 @@ button:disabled{opacity:.65;cursor:wait;}
 <body>
 <main class="auth">
   <div class="logo"><div class="logo-mark">T</div>ThinkTrail.AI</div>
-  <h1 id="title">Welcome back.</h1>
-  <p class="intro" id="intro">Sign in to continue learning with your tutor.</p>
+  <h1>Welcome back.</h1>
+  <p class="intro">Enter your email and we will send you a one-time code.</p>
   <form id="authForm">
     <label for="email">Email</label>
     <input id="email" type="email" autocomplete="email" required>
-    <label for="password">Password</label>
-    <input id="password" type="password" autocomplete="current-password" minlength="6" required>
-    <button id="submitButton" type="submit">Sign in</button>
+    <div id="codeSection" hidden>
+      <label for="code">Verification code</label>
+      <input id="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6">
+    </div>
+    <button id="submitButton" type="submit">Send code</button>
   </form>
   <div class="oauth-divider">or continue with</div>
   <div class="oauth-buttons">
@@ -52,33 +54,19 @@ button:disabled{opacity:.65;cursor:wait;}
     <button class="oauth-button" type="button" data-provider="apple">Continue with Apple</button>
     <button class="oauth-button" type="button" data-provider="azure">Continue with Microsoft</button>
   </div>
-  <p class="switch"><span id="switchText">New to ThinkTrail.AI?</span> <button id="switchButton" type="button">Create an account</button></p>
   <p class="message" id="message" role="status"></p>
 </main>
 <script>
-let isSignUp = false;
+let codeSent = false;
 const form = document.getElementById('authForm');
-const title = document.getElementById('title');
-const intro = document.getElementById('intro');
 const submitButton = document.getElementById('submitButton');
-const switchText = document.getElementById('switchText');
-const switchButton = document.getElementById('switchButton');
 const message = document.getElementById('message');
+const codeSection = document.getElementById('codeSection');
+const codeInput = document.getElementById('code');
 const oauthButtons = document.querySelectorAll('[data-provider]');
 
 supabaseClient.auth.getSession().then(({ data: { session } }) => {
   if (session) window.location.href = '../';
-});
-
-switchButton.addEventListener('click', () => {
-  isSignUp = !isSignUp;
-  title.textContent = isSignUp ? 'Start learning.' : 'Welcome back.';
-  intro.textContent = isSignUp ? 'Create an account to start learning with your tutor.' : 'Sign in to continue learning with your tutor.';
-  submitButton.textContent = isSignUp ? 'Create account' : 'Sign in';
-  switchText.textContent = isSignUp ? 'Already have an account?' : 'New to ThinkTrail.AI?';
-  switchButton.textContent = isSignUp ? 'Sign in' : 'Create an account';
-  document.getElementById('password').autocomplete = isSignUp ? 'new-password' : 'current-password';
-  message.textContent = '';
 });
 
 oauthButtons.forEach((button) => {
@@ -104,21 +92,24 @@ oauthButtons.forEach((button) => {
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
   message.className = 'message';
-  message.textContent = 'Working...';
+  message.textContent = codeSent ? 'Checking code...' : 'Sending code...';
   submitButton.disabled = true;
   const email = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value;
-  const result = isSignUp
-    ? await supabaseClient.auth.signUp({ email, password })
-    : await supabaseClient.auth.signInWithPassword({ email, password });
+  const result = codeSent
+    ? await supabaseClient.auth.verifyOtp({ email, token: codeInput.value.trim(), type: 'email' })
+    : await supabaseClient.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
   submitButton.disabled = false;
   if (result.error) {
     message.className = 'message error';
     message.textContent = result.error.message;
     return;
   }
-  if (isSignUp && !result.data.session) {
-    message.textContent = 'Check your email to confirm your account.';
+  if (!codeSent) {
+    codeSent = true;
+    codeSection.hidden = false;
+    codeInput.required = true;
+    submitButton.textContent = 'Verify code';
+    message.textContent = 'Check your email for the 6-digit code.';
     return;
   }
   window.location.href = '../';
