@@ -44,10 +44,6 @@ button:disabled{opacity:.65;cursor:wait;}
     <input id="email" type="email" autocomplete="email" required>
     <label for="password">Password</label>
     <input id="password" type="password" autocomplete="current-password" minlength="6" required>
-    <div id="codeSection" hidden>
-      <label for="code">Email verification code</label>
-      <input id="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6">
-    </div>
     <button id="submitButton" type="submit">Sign in</button>
   </form>
   <div class="oauth-divider">or continue with</div>
@@ -59,7 +55,6 @@ button:disabled{opacity:.65;cursor:wait;}
 </main>
 <script>
 let isSignUp = false;
-let verificationSent = false;
 const form = document.getElementById('authForm');
 const title = document.getElementById('title');
 const intro = document.getElementById('intro');
@@ -67,8 +62,6 @@ const submitButton = document.getElementById('submitButton');
 const switchText = document.getElementById('switchText');
 const switchButton = document.getElementById('switchButton');
 const message = document.getElementById('message');
-const codeSection = document.getElementById('codeSection');
-const codeInput = document.getElementById('code');
 const passwordInput = document.getElementById('password');
 const oauthButtons = document.querySelectorAll('[data-provider]');
 
@@ -78,14 +71,11 @@ supabaseClient.auth.getSession().then(({ data: { session } }) => {
 
 switchButton.addEventListener('click', () => {
   isSignUp = !isSignUp;
-  verificationSent = false;
   title.textContent = isSignUp ? 'Create your account.' : 'Welcome back.';
-  intro.textContent = isSignUp ? 'Create a password, then verify your email.' : 'Sign in with your email and password.';
+  intro.textContent = isSignUp ? 'Create a password to get started.' : 'Sign in with your email and password.';
   submitButton.textContent = isSignUp ? 'Create account' : 'Sign in';
   switchText.textContent = isSignUp ? 'Already have an account?' : 'New to ThinkTrail.AI?';
   switchButton.textContent = isSignUp ? 'Sign in' : 'Create an account';
-  codeSection.hidden = true;
-  codeInput.required = false;
   passwordInput.autocomplete = isSignUp ? 'new-password' : 'current-password';
   message.textContent = '';
 });
@@ -113,32 +103,26 @@ oauthButtons.forEach((button) => {
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
   message.className = 'message';
-  message.textContent = verificationSent ? 'Checking code...' : 'Working...';
+  message.textContent = 'Working...';
   submitButton.disabled = true;
   const email = document.getElementById('email').value.trim();
   const password = passwordInput.value;
   let result;
-  if (isSignUp && verificationSent) {
-    result = await supabaseClient.auth.verifyOtp({ email, token: codeInput.value.trim(), type: 'signup' });
-  } else if (isSignUp) {
+
+  if (isSignUp) {
     result = await supabaseClient.auth.signUp({ email, password });
   } else {
     result = await supabaseClient.auth.signInWithPassword({ email, password });
   }
+
   submitButton.disabled = false;
+
   if (result.error) {
     message.className = 'message error';
     message.textContent = result.error.message;
     return;
   }
-  if (isSignUp && !verificationSent && !result.data.session) {
-    verificationSent = true;
-    codeSection.hidden = false;
-    codeInput.required = true;
-    submitButton.textContent = 'Verify code';
-    message.textContent = 'Check your email for the 6-digit verification code.';
-    return;
-  }
+
   window.location.href = '../';
 });
 </script>
