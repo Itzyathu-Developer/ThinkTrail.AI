@@ -19,6 +19,8 @@ ThinkTrail.AI is a browser-based study companion that helps students understand 
 .
 ├── index.html          # Main authenticated study experience
 ├── config.js           # Supabase browser client configuration
+├── supabase/
+│   └── functions/tutor/ # Secure Groq tutor Edge Function
 ├── privacy.html        # Privacy Policy
 ├── terms.html          # Terms of Service
 └── signin/
@@ -56,6 +58,22 @@ Before deploying:
 5. Confirm that email verification settings match the sign-up flow in `signin/index.html`.
 
 The Supabase anonymous key is intended for browser use. Keep database access protected with appropriate Row Level Security policies, and never place a Supabase service-role key in frontend code.
+
+## Groq Tutor Setup
+
+The tutor calls Groq through `supabase/functions/tutor/index.ts`. The Groq API key must be stored as a Supabase secret, not in the frontend:
+
+```bash
+supabase secrets set GROQ_API_KEY=your_groq_api_key
+supabase functions deploy tutor
+```
+
+The function uses Groq's `llama-3.3-70b-versatile` model and receives the student's question, selected subject, and tutor mode. Make sure the Supabase CLI is linked to the project before deploying:
+
+```bash
+supabase login
+supabase link --project-ref your_project_ref
+```
 
 ## Deployment
 

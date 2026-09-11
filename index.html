@@ -734,18 +734,30 @@ function handleKey(event){
   }
 }
 
-function sendMessage(){
+async function sendMessage(){
   const input = document.getElementById("question");
+  const sendButton = document.querySelector(".send");
   const text = input.value.trim();
   if(!text) return;
 
   addMessage(text, "user");
   input.value = "";
+  sendButton.disabled = true;
+  sendButton.textContent = "Thinking...";
 
-  setTimeout(() => {
-    const response = generateDemoResponse(text);
-    addMessage(response, "ai");
-  }, 550);
+  const { data, error } = await supabaseClient.functions.invoke("tutor", {
+    body: { question: text, subject: currentSubject, mode: currentMode }
+  });
+
+  sendButton.disabled = false;
+  sendButton.textContent = "Ask ThinkTrail.AI";
+
+  if(error || !data?.answer){
+    addMessage("I couldn't reach the tutor right now. Please try again in a moment.", "ai");
+    return;
+  }
+
+  addMessage(data.answer, "ai");
 }
 
 function addMessage(text, type){
@@ -755,50 +767,11 @@ function addMessage(text, type){
 
   const bubble = document.createElement("div");
   bubble.className = "bubble";
-  bubble.innerHTML = text;
+  bubble.textContent = text;
 
   message.appendChild(bubble);
   chat.appendChild(message);
   chat.scrollTop = chat.scrollHeight;
-}
-
-function generateDemoResponse(text){
-  const lower = text.toLowerCase();
-
-  const unsafeTerms = ["porn","sexual","weapon","drug","suicide","self harm"];
-
-  if(unsafeTerms.some(term => lower.includes(term))){
-    return `
-      <strong>ThinkTrail.AI is for studying only.</strong><br><br>
-      I can't help with that topic. Ask me about homework, revision, or another
-      school subject instead.
-    `;
-  }
-
-  if(currentMode === "Practice"){
-    return `
-      <strong>Practice mode.</strong><br><br>
-      Let's practice <strong>${currentSubject}</strong>. I'll give you a similar
-      problem first, then we'll check your answer together.
-    `;
-  }
-
-  if(currentMode === "Quiz"){
-    return `
-      <strong>Quiz mode.</strong><br><br>
-      Here's your first question about <strong>${currentSubject}</strong>:
-      <br><br>
-      What's one important idea you remember about this topic?
-    `;
-  }
-
-  return `
-    <strong>Let's work through it.</strong><br><br>
-    You asked about <strong>${currentSubject}</strong>. Instead of the answer
-    right away, I'll break this into smaller steps.
-    <br><br>
-    <strong>First:</strong> which part is tripping you up?
-  `;
 }
 
 async function gameAnswer(button, correct){
