@@ -19,13 +19,18 @@ Deno.serve(async (request) => {
     return jsonResponse({ error: "Only POST requests are supported." }, 405);
   }
 
-  const groqApiKey = Deno.env.get("GROQ_API_KEY");
+  const groqApiKey = Deno.env.get("GROQ_API_KEY") ?? Deno.env.get("OPENAI_API_KEY");
+  const groqModel = Deno.env.get("GROQ_MODEL") ?? "llama-3.3-70b-versatile";
+
   if (!groqApiKey) {
-    return jsonResponse({ error: "The tutor is not configured yet." }, 500);
+    return jsonResponse({
+      error: "The AI tutor is not configured yet. Add GROQ_API_KEY (or OPENAI_API_KEY) as a Supabase secret and deploy the function."
+    }, 500);
   }
 
   try {
-    const body = await request.json();
+    const rawBody = await request.text();
+    const body = rawBody ? JSON.parse(rawBody) : {};
     const question = typeof body.question === "string" ? body.question.trim() : "";
     const subject = typeof body.subject === "string" ? body.subject.trim() : "Other";
     const mode = typeof body.mode === "string" ? body.mode.trim() : "Learn";
@@ -45,7 +50,7 @@ Deno.serve(async (request) => {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
+        model: groqModel,
         temperature: 0.4,
         max_tokens: 700,
         messages: [
@@ -61,18 +66,20 @@ Guide the student toward understanding instead of doing all the work for them. E
     });
 
     if (!groqResponse.ok) {
-      return jsonResponse({ error: "Groq could not answer right now." }, 502);
+      const errorText = await groqResponse.text();
+      return jsonResponse({ error: `Groq could not answer right now: ${errorText}` }, 502);
     }
 
     const result = await groqResponse.json();
-    const answer = result.choices?.[0]?.message?.content?.trim();
+    const answer = result.choices?.[0]?.message?.content?.trim() ?? result?.output_text?.trim();
 
     if (!answer) {
       return jsonResponse({ error: "The tutor returned an empty answer." }, 502);
     }
 
     return jsonResponse({ answer });
-  } catch {
+  } catch (error) {
+    console.error("Tutor error:", error);
     return jsonResponse({ error: "The tutor request was invalid." }, 400);
   }
 });

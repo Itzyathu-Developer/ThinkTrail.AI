@@ -75,11 +75,30 @@ supabase login
 supabase link --project-ref your_project_ref
 ```
 
-## Deployment
+## Deployment with Vercel
 
-Deploy the project as a static site with any host that serves HTML files, such as GitHub Pages, Netlify, Vercel, or Cloudflare Pages. Set the deployed site URL as the production redirect URL in Supabase before testing OAuth sign-in.
+This repository is configured as a no-build Vercel static site. Deploy it from the project root with the Vercel CLI:
+
+```bash
+npx vercel
+```
+
+For a production deployment:
+
+```bash
+npx vercel --prod
+```
+
+Or import the repository in the Vercel dashboard and leave the framework preset as **Other**. No build command or output directory is required. The included `vercel.json` provides clean routes for `/signin`, `/privacy`, and `/terms`.
+
+After deployment, add the production URL to Supabase Authentication → URL Configuration:
+
+- Site URL: `https://your-project.vercel.app`
+- Redirect URL: `https://your-project.vercel.app/**`
+
+Also add any custom domain you use. The OAuth callback in `signin/index.html` automatically uses the current deployed origin.
 
 ## Legal Pages
 
 - [Privacy Policy](privacy.html)
-- [Terms of Service](terms.html)
+- [Terms of Service](terms.html)  

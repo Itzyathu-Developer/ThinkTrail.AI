@@ -752,12 +752,33 @@ async function sendMessage(){
   sendButton.disabled = false;
   sendButton.textContent = "Ask ThinkTrail.AI";
 
-  if(error || !data?.answer){
-    addMessage("I couldn't reach the tutor right now. Please try again in a moment.", "ai");
+  const serverError = data?.error || error?.message || error;
+  if (error || !data?.answer) {
+    const message = getTutorErrorMessage(serverError);
+    console.error("Tutor request failed:", serverError);
+    addMessage(message, "ai");
     return;
   }
 
   addMessage(data.answer, "ai");
+}
+
+function getTutorErrorMessage(error){
+  const text = typeof error === "string" ? error : (error?.message || "");
+
+  if (!text) {
+    return "The AI tutor is unavailable right now. Please try again in a moment.";
+  }
+
+  if (/not configured|GROQ_API_KEY|OPENAI_API_KEY|deploy|secret|FunctionsHttpError|404/i.test(text)) {
+    return "The AI tutor is not configured yet. Add the Groq API key in Supabase and deploy the tutor function before using it.";
+  }
+
+  if (/429|rate limit|quota|too many requests|temporar/i.test(text)) {
+    return "The AI tutor is temporarily rate-limited. Please try again in a moment.";
+  }
+
+  return "I couldn't reach the tutor right now. Please try again in a moment.";
 }
 
 function addMessage(text, type){
