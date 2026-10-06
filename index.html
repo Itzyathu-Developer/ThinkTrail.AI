@@ -939,19 +939,31 @@ function handleImageSearchKey(event){
 }
 
 async function searchStudyImages(){
-  const query = document.getElementById("imageSearchQuery").value.trim();
+  const enteredQuery = document.getElementById("imageSearchQuery").value.trim();
   const status = document.getElementById("imageSearchStatus");
   const results = document.getElementById("imageSearchResults");
   const button = document.getElementById("imageSearchButton");
-  if(query.length < 2){
+  if(enteredQuery.length < 2){
     status.textContent = "Enter at least two characters to search.";
     return;
   }
-  if(blockedImageSearchPattern.test(query)){
+  if(blockedImageSearchPattern.test(enteredQuery)){
     status.textContent = "Search is limited to school and study topics.";
     results.replaceChildren();
     return;
   }
+
+  const normalizedQuery = enteredQuery.toLowerCase();
+  const query = /\breproduct(?:ion|ive)\b/.test(normalizedQuery) && /\bhumans?\b/.test(normalizedQuery)
+    ? "human reproductive system"
+    : /\bsound\b/.test(normalizedQuery) && (/\b(?:class|grade|science|physics)\b/.test(normalizedQuery) || currentSubject === "Science")
+      ? "sound wave diagram"
+    : enteredQuery
+      .replace(/\b(?:class|grade|standard|science|biology|chapter|textbook|study|diagram|images?)\b/gi, " ")
+      .replace(/\b(?:[6-9](?:th)?|1[0-2](?:th)?|ix|x|xi|xii)\b/gi, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  const queryTerms = [...new Set(query.toLowerCase().match(/[a-z]{4,}/g) || [])];
 
   imageSearchController?.abort();
   imageSearchController = new AbortController();
@@ -980,20 +992,27 @@ async function searchStudyImages(){
       return;
     }
 
-    status.textContent = `${pages.length} images from Wikimedia Commons`;
+    let renderedCount = 0;
     pages.forEach(page => {
       const info = page.imageinfo[0];
       const imageUrl = new URL(info.thumburl);
       if(!["upload.wikimedia.org", "thumb.wikimedia.org"].includes(imageUrl.hostname) || imageUrl.protocol !== "https:") return;
+      const titleText = page.title.replace(/^File:/, "");
+      if(/\b(?:journal|monthly|volume|gossip|political science|institutes of medicine|winged bull|genitalia|nude|porn)\b/i.test(titleText)) return;
+      if(query === "sound wave diagram" && /\b(?:sound of|music|chord|interval|dome|rainfall|antarctic|river|lake|bay|island|village|farm|lodge|hall|county|island)\b/i.test(titleText)) return;
+      const normalizedTitle = titleText.toLowerCase().replace(/[^a-z0-9]+/g, " ");
+      const matchedTerms = queryTerms.filter(term => normalizedTitle.includes(term)).length;
+      const requiredMatches = queryTerms.length > 1 ? 2 : 1;
+      if(queryTerms.length && matchedTerms < requiredMatches) return;
 
       const card = document.createElement("article");
       card.className = "image-search-result";
       const image = document.createElement("img");
       image.src = info.thumburl;
-      image.alt = page.title.replace(/^File:/, "");
+      image.alt = titleText;
       image.loading = "lazy";
       const title = document.createElement("p");
-      title.textContent = page.title.replace(/^File:/, "");
+      title.textContent = titleText;
       const source = document.createElement("a");
       source.href = info.descriptionurl;
       source.target = "_blank";
@@ -1010,8 +1029,11 @@ async function searchStudyImages(){
       downloadButton.addEventListener("click", () => downloadStudyImage(info.thumburl, page.title));
       card.append(image, title, source, useButton, downloadButton);
       results.appendChild(card);
+      renderedCount += 1;
     });
-    if(!results.childElementCount) status.textContent = "No usable images found. Try another study topic.";
+    status.textContent = renderedCount
+      ? `Showing ${renderedCount} relevant freely licensed images from Wikimedia Commons.`
+      : "No closely matching study images found. Try a more specific topic, such as “human reproductive system diagram”.";
   }catch(error){
     if(error.name !== "AbortError") status.textContent = error.message || "Image search failed. Please try again.";
   }finally{
