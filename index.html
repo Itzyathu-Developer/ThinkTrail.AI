@@ -26,7 +26,7 @@
   --muted-on-ink:#B9C4B4;
 }
 
-*{box-sizing:border-box;margin:0;padding:0;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 
 html{scroll-behavior:smooth;}
 
@@ -42,6 +42,7 @@ h1,h2,h3,.serif{font-family:'Source Serif 4', Georgia, serif;}
 button,textarea,input{font:inherit;color:inherit;}
 button{cursor:pointer;border:0;background:none;}
 :focus-visible{outline:2px solid var(--amber-dark);outline-offset:3px;}
+:focus:not(:focus-visible){outline:none;}
 
 @media (prefers-reduced-motion: reduce){
   *{animation-duration:.001ms !important; transition-duration:.001ms !important;}
@@ -131,6 +132,18 @@ button{cursor:pointer;border:0;background:none;}
   font-weight:500;
 }
 .avatar-menu button:hover{background:#F1F0E8;}
+
+.profile-dialog{width:min(420px,calc(100% - 32px));margin:auto;border:1px solid var(--rule);border-radius:12px;padding:24px;background:var(--paper-card);color:var(--text);box-shadow:0 24px 80px rgba(0,0,0,.3);}
+.profile-dialog::backdrop{background:rgba(12,22,16,.58);}
+.profile-dialog h2{font-size:24px;margin-bottom:6px;}
+.profile-dialog p{font-size:13px;color:var(--muted);margin-bottom:18px;}
+.profile-dialog label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;}
+.profile-dialog input{width:100%;padding:11px 12px;border:1px solid var(--rule);border-radius:7px;background:#fff;}
+.profile-dialog-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;}
+.profile-dialog-actions button{padding:9px 13px;border-radius:7px;font-size:13px;font-weight:600;}
+.profile-cancel{border:1px solid var(--rule);}
+.profile-save{background:var(--forest);color:#fff;}
+.profile-status{min-height:18px;margin-top:10px;color:var(--muted);font-size:12px;}
 
 /* ---------- HERO ---------- */
 .hero{
@@ -465,6 +478,10 @@ textarea{
   font-weight:500;
 }
 .game-option:hover{border-color:var(--amber);}
+.game-option:disabled{cursor:default;opacity:.78;}
+.game-feedback{min-height:24px;margin-top:12px;color:#E7D9BD;font-size:13px;line-height:1.5;}
+.game-generate{margin-top:8px;padding:10px 14px;border:1px solid rgba(217,142,63,.65);border-radius:8px;background:var(--amber);color:var(--ink);font-size:13px;font-weight:600;}
+.game-generate:disabled{opacity:.65;cursor:wait;}
 
 /* FEATURES */
 .features{
@@ -540,6 +557,8 @@ footer strong{color:#fff;font-weight:600;}
   .subject-icon{font-size:15px;}
   .mode-buttons{gap:12px;overflow-x:auto;}
   .game-options{grid-template-columns:1fr;}
+  .profile-dialog{padding:20px;}
+  .profile-dialog-actions button{flex:1;}
   footer{flex-direction:column;text-align:left;}
 }
 </style>
@@ -559,6 +578,7 @@ footer strong{color:#fff;font-weight:600;}
       <button class="avatar" id="avatarBtn">•</button>
       <div class="avatar-menu" id="avatarMenu">
         <div class="avatar-menu-email" id="avatarEmail">Loading…</div>
+        <button type="button" onclick="openProfileSettings()">Profile settings</button>
         <button onclick="signOut()">Sign out</button>
       </div>
     </div>
@@ -673,16 +693,13 @@ footer strong{color:#fff;font-weight:600;}
 
   <div class="game-panel" id="gamePanel">
     <div class="game-header">
-      <h3>Fraction Quest</h3>
+      <h3 id="gameTitle">Study challenge</h3>
       <div class="xp" id="xpCounter">120 XP</div>
     </div>
-    <div class="game-question">What is 1/2 + 1/4?</div>
-    <div class="game-options">
-      <button class="game-option" onclick="gameAnswer(this,false)">1/3</button>
-      <button class="game-option" onclick="gameAnswer(this,true)">3/4</button>
-      <button class="game-option" onclick="gameAnswer(this,false)">2/6</button>
-      <button class="game-option" onclick="gameAnswer(this,false)">1</button>
-    </div>
+    <p class="game-question" id="gameQuestion">Generate a fresh challenge for the selected subject.</p>
+    <div class="game-options" id="gameOptions"></div>
+    <p class="game-feedback" id="gameFeedback" aria-live="polite"></p>
+    <button class="game-generate" id="generateGameButton" type="button" onclick="generateStudyGame()">Generate challenge</button>
   </div>
 
 </section>
@@ -720,6 +737,20 @@ footer strong{color:#fff;font-weight:600;}
   <div><a href="privacy.html" style="color:inherit">Privacy Policy</a> · <a href="terms.html" style="color:inherit">Terms of Service</a></div>
 </footer>
 
+<dialog class="profile-dialog" id="profileDialog" aria-labelledby="profileDialogTitle">
+  <form method="dialog" onsubmit="return false">
+    <h2 id="profileDialogTitle">Profile settings</h2>
+    <p>Update the name shown on your account.</p>
+    <label for="profileNameInput">Display name</label>
+    <input id="profileNameInput" type="text" maxlength="60" autocomplete="name" required>
+    <div class="profile-status" id="profileStatus" role="status" aria-live="polite"></div>
+    <div class="profile-dialog-actions">
+      <button class="profile-cancel" type="button" onclick="document.getElementById('profileDialog').close()">Cancel</button>
+      <button class="profile-save" id="saveProfileButton" type="button" onclick="saveProfileSettings()">Save</button>
+    </div>
+  </form>
+</dialog>
+
 <script>
 
 let currentSubject = "Math";
@@ -729,6 +760,8 @@ let imageSearchController = null;
 const blockedImageSearchPattern = /\b(?:sex|sexual|porn(?:ography)?|nudes?|naked|erotic|orgasm|masturbat\w*|intercourse)\b/i;
 let xp = 120;
 let currentUser = null;
+let currentProfileName = "";
+let currentGame = null;
 
 // ---- Auth guard + profile load ----
 (async function initAuth(){
@@ -749,6 +782,7 @@ let currentUser = null;
     .single();
 
   const displayName = profile?.name || currentUser.email;
+  currentProfileName = profile?.name || "";
   const initial = displayName.trim().charAt(0).toUpperCase();
 
   document.getElementById("avatarBtn").textContent = initial;
@@ -777,6 +811,40 @@ document.addEventListener("click", function(e){
 async function signOut(){
   await supabaseClient.auth.signOut();
   window.location.href = "signin/index.html";
+}
+
+function openProfileSettings(){
+  document.getElementById("avatarMenu").classList.remove("show");
+  document.getElementById("profileNameInput").value = currentProfileName;
+  document.getElementById("profileStatus").textContent = "";
+  document.getElementById("profileDialog").showModal();
+}
+
+async function saveProfileSettings(){
+  const input = document.getElementById("profileNameInput");
+  const status = document.getElementById("profileStatus");
+  const button = document.getElementById("saveProfileButton");
+  const name = input.value.trim();
+  if(!name){
+    status.textContent = "Enter a display name.";
+    input.focus();
+    return;
+  }
+  if(!currentUser) return;
+
+  button.disabled = true;
+  status.textContent = "Saving…";
+  const { error } = await supabaseClient.from("profiles").update({ name }).eq("id", currentUser.id);
+  button.disabled = false;
+  if(error){
+    status.textContent = "Could not save your profile. Please try again.";
+    return;
+  }
+
+  currentProfileName = name;
+  document.getElementById("avatarBtn").textContent = name.charAt(0).toUpperCase();
+  document.getElementById("avatarEmail").textContent = currentUser.email;
+  document.getElementById("profileDialog").close();
 }
 
 function selectSubject(button, subject){
@@ -1042,19 +1110,55 @@ function addMessage(text, type, imageUrl = ""){
   chat.scrollTop = chat.scrollHeight;
 }
 
-async function gameAnswer(button, correct){
-  if(correct){
-    button.textContent = "Correct — +25 XP";
+async function gameAnswer(button){
+  if(!currentGame || button.disabled) return;
+  const selectedIndex = Number(button.dataset.optionIndex);
+  const isCorrect = selectedIndex === currentGame.answerIndex;
+  document.querySelectorAll(".game-option").forEach(option => { option.disabled = true; });
+  const feedback = document.getElementById("gameFeedback");
+  if(isCorrect){
     xp += 25;
     document.getElementById("xpCounter").textContent = xp + " XP";
+    feedback.textContent = `Correct! +25 XP. ${currentGame.explanation}`;
+    if(currentUser) await supabaseClient.from("profiles").update({ xp }).eq("id", currentUser.id);
+  }else{
+    feedback.textContent = `Not quite. ${currentGame.explanation}`;
+  }
+}
 
-    if(currentUser){
-      await supabaseClient.from("profiles").update({ xp }).eq("id", currentUser.id);
-    }
-  } else {
-    const original = button.textContent;
-    button.textContent = "Try again";
-    setTimeout(() => { button.textContent = original; }, 900);
+async function generateStudyGame(){
+  const button = document.getElementById("generateGameButton");
+  const question = document.getElementById("gameQuestion");
+  const options = document.getElementById("gameOptions");
+  const feedback = document.getElementById("gameFeedback");
+  button.disabled = true;
+  button.textContent = "Creating challenge…";
+  question.textContent = `Creating a ${currentSubject} challenge…`;
+  options.replaceChildren();
+  feedback.textContent = "";
+  try{
+    const { data, error } = await supabaseClient.functions.invoke("tutor", {
+      body: { generateGame: true, subject: currentSubject }
+    });
+    if(error || !data?.game) throw new Error(data?.error || error?.message || "Could not create a challenge.");
+    currentGame = data.game;
+    question.textContent = currentGame.question;
+    currentGame.options.forEach((optionText, index) => {
+      const option = document.createElement("button");
+      option.className = "game-option";
+      option.type = "button";
+      option.textContent = optionText;
+      option.dataset.optionIndex = String(index);
+      option.addEventListener("click", () => gameAnswer(option));
+      options.appendChild(option);
+    });
+  }catch(error){
+    currentGame = null;
+    question.textContent = "Couldn't create a challenge right now.";
+    feedback.textContent = getTutorErrorMessage(error.message);
+  }finally{
+    button.disabled = false;
+    button.textContent = "Generate another challenge";
   }
 }
 
