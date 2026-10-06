@@ -403,7 +403,7 @@ textarea{
 .image-search-results{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:12px;}
 .image-search-result{min-width:0;border:1px solid var(--rule);border-radius:7px;background:#fff;overflow:hidden;}
 .image-search-result img{display:block;width:100%;height:96px;object-fit:cover;background:#F1F0E8;}
-.image-search-result p{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;padding:7px 8px 2px;font-size:11px;line-height:1.35;}
+.image-search-result p{display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;padding:7px 8px 2px;font-size:11px;line-height:1.35;}
 .image-search-result a{display:block;padding:2px 8px;color:var(--forest);font-size:10px;}
 .image-search-result button{width:calc(100% - 16px);margin:6px 8px 8px;padding:6px;border:1px solid var(--rule);border-radius:6px;font-size:11px;font-weight:600;}
 .image-search-result button:hover{background:#F1F0E8;}
@@ -492,6 +492,10 @@ textarea{
 .feature h3{font-size:16px;font-weight:600;margin-bottom:8px;}
 .feature p{color:var(--muted);font-size:13.8px;line-height:1.6;}
 
+.creator-intro{margin-top:54px;padding-top:22px;border-top:1px solid var(--rule);}
+.creator-intro h2{font-size:22px;font-weight:600;margin-bottom:8px;}
+.creator-intro p{max-width:64ch;color:var(--muted);font-size:14px;line-height:1.7;}
+
 /* FOOTER */
 footer{
   background:var(--ink);
@@ -564,9 +568,9 @@ footer strong{color:#fff;font-weight:600;}
 <section class="hero">
   <div class="hero-inner">
     <div>
-      <div class="eyebrow">About me</div>
-      <h1>Yatharth Ganesh Bochare</h1>
-      <p>I'm also known as Itzyathu_12. I'm in Grade 9 and have applied to Hackdevengers.</p>
+      <div class="eyebrow">Built by Itzyathu</div>
+      <h1>ThinkTrail.AI</h1>
+      <p>ThinkTrail.AI is an AI study tutor for students. It helps with school subjects through step-by-step explanations, hints, homework practice, quizzes, and questions about study photos, so students can understand a topic instead of only copying an answer.</p>
       <div class="hero-cta">
         <a class="btn-primary public-only" href="signin/index.html">Sign in to start learning</a>
         <button class="btn-primary app-only" id="startSessionBtn" hidden onclick="document.getElementById('tutor').scrollIntoView()">Start a session</button>
@@ -701,6 +705,11 @@ footer strong{color:#fff;font-weight:600;}
     <h3>Built for students</h3>
     <p>Stays focused on safe, age-appropriate homework help instead of open-ended chat.</p>
   </div>
+</section>
+
+<section class="creator-intro" aria-labelledby="creatorIntroTitle">
+  <h2 id="creatorIntroTitle">About the creator</h2>
+  <p>I'm Yatharth Ganesh Bochare, also known as Itzyathu_12. I'm in Grade 9 and have applied to Hackdevengers.</p>
 </section>
 
 </main>
