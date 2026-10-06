@@ -185,14 +185,19 @@ button{cursor:pointer;border:0;background:none;}
 }
 
 .btn-primary{
+  display:inline-block;
   background:var(--amber);
   color:var(--ink);
   font-weight:600;
   padding:13px 22px;
   border-radius:10px;
   font-size:15px;
+  text-decoration:none;
 }
 .btn-primary:hover{background:#e6a15a;}
+.nav-signin{color:#fff;text-decoration:none;font-size:14px;font-weight:600;border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:8px 12px;}
+.nav-signin:hover{border-color:var(--amber);}
+.app-only[hidden],.public-only[hidden]{display:none !important;}
 
 .btn-ghost{
   color:#fff;
@@ -381,6 +386,14 @@ textarea{
   padding:8px;
 }
 
+.photo-preview{display:none;align-items:center;gap:10px;padding:4px 8px 10px;}
+.photo-preview.show{display:flex;}
+.photo-preview img{width:72px;height:56px;object-fit:cover;border:1px solid var(--rule);border-radius:6px;}
+.photo-preview button,.photo-button{border:1px solid var(--rule);border-radius:8px;background:transparent;padding:7px 10px;font-size:12px;cursor:pointer;}
+.photo-preview button:hover,.photo-button:hover{background:#F1F0E8;}
+.input-tools{display:flex;align-items:center;gap:12px;}
+.photo-input{display:none;}
+
 .input-bottom{display:flex;justify-content:space-between;align-items:center;padding:0 4px;}
 
 .safe-note{font-size:11.5px;color:var(--muted);}
@@ -511,8 +524,9 @@ footer strong{color:#fff;font-weight:600;}
     ThinkTrail.AI
   </div>
   <div class="nav-right">
-    <div class="streak" id="streakBadge">— day streak</div>
-    <div class="avatar-wrap">
+    <a class="nav-signin public-only" id="navSignin" href="signin/index.html">Sign in</a>
+    <div class="streak app-only" id="streakBadge" hidden>— day streak</div>
+    <div class="avatar-wrap app-only" hidden>
       <button class="avatar" id="avatarBtn">•</button>
       <div class="avatar-menu" id="avatarMenu">
         <div class="avatar-menu-email" id="avatarEmail">Loading…</div>
@@ -526,10 +540,11 @@ footer strong{color:#fff;font-weight:600;}
   <div class="hero-inner">
     <div>
       <div class="eyebrow">Built by Itzyathu</div>
-      <h1>Understand it.<br>Don't just <u>copy it.</u></h1>
-      <p>ThinkTrail.AI walks you through homework step by step — hints before answers, practice before quizzes, and a quick game when you want the reps to feel less like a chore.</p>
+      <h1>ThinkTrail.AI</h1>
+      <p>ThinkTrail.AI is an AI study tutor for students. It helps with school subjects through step-by-step explanations, hints, homework practice, quizzes, and questions about study photos, so students can understand a topic instead of only copying an answer.</p>
       <div class="hero-cta">
-        <button class="btn-primary" onclick="document.getElementById('tutor').scrollIntoView()">Start a session</button>
+        <a class="btn-primary public-only" href="signin/index.html">Sign in to start learning</a>
+        <button class="btn-primary app-only" id="startSessionBtn" hidden onclick="document.getElementById('tutor').scrollIntoView()">Start a session</button>
         <button class="btn-ghost" onclick="document.getElementById('features').scrollIntoView()">See how it works</button>
       </div>
     </div>
@@ -549,9 +564,9 @@ footer strong{color:#fff;font-weight:600;}
 
 <main>
 
-<div class="section-title">What are you studying</div>
+<div class="section-title app-only" hidden>What are you studying</div>
 
-<section class="subjects" id="subjects">
+<section class="subjects app-only" id="subjects" hidden>
   <button class="subject active" onclick="selectSubject(this,'Math')">
     <span class="subject-icon">📐</span><span>Math</span>
   </button>
@@ -572,7 +587,7 @@ footer strong{color:#fff;font-weight:600;}
   </button>
 </section>
 
-<section class="tutor" id="tutor">
+<section class="tutor app-only" id="tutor" hidden>
 
   <div class="tutor-top">
     <div class="tutor-title">
@@ -603,8 +618,16 @@ footer strong{color:#fff;font-weight:600;}
 
   <div class="input-area">
     <textarea id="question" placeholder="Ask ThinkTrail.AI about your homework..." onkeydown="handleKey(event)"></textarea>
+    <div class="photo-preview" id="photoPreview">
+      <img id="photoThumbnail" alt="Selected study photo preview">
+      <button type="button" onclick="removeStudyPhoto()">Remove photo</button>
+    </div>
     <div class="input-bottom">
-      <div class="safe-note">ThinkTrail.AI is built for safe, on-topic studying.</div>
+      <div class="input-tools">
+        <label class="photo-button" for="studyPhoto">Add photo</label>
+        <input class="photo-input" id="studyPhoto" type="file" accept="image/jpeg,image/png,image/webp" onchange="handleStudyPhoto(event)">
+        <div class="safe-note">Study photos only</div>
+      </div>
       <button class="send" onclick="sendMessage()">Ask ThinkTrail.AI</button>
     </div>
   </div>
@@ -625,7 +648,7 @@ footer strong{color:#fff;font-weight:600;}
 
 </section>
 
-<div class="section-title" id="features">Why students stick with it</div>
+<div class="section-title" id="features">How ThinkTrail.AI supports learning</div>
 
 <section class="features">
   <div class="feature">
@@ -650,12 +673,14 @@ footer strong{color:#fff;font-weight:600;}
 <footer>
   <div><strong>ThinkTrail.AI</strong> — an Itzyathu product</div>
   <div>Developer: Yatharth G. Bochare</div>
+  <div><a href="privacy.html" style="color:inherit">Privacy Policy</a> · <a href="terms.html" style="color:inherit">Terms of Service</a></div>
 </footer>
 
 <script>
 
 let currentSubject = "Math";
 let currentMode = "Learn";
+let selectedImageDataUrl = "";
 let xp = 120;
 let currentUser = null;
 
@@ -664,11 +689,12 @@ let currentUser = null;
   const { data: { session } } = await supabaseClient.auth.getSession();
 
   if(!session){
-    window.location.href = "signin/index.html";
     return;
   }
 
   currentUser = session.user;
+  document.querySelectorAll(".app-only").forEach(element => { element.hidden = false; });
+  document.querySelectorAll(".public-only").forEach(element => { element.hidden = true; });
 
   const { data: profile } = await supabaseClient
     .from("profiles")
@@ -734,19 +760,75 @@ function handleKey(event){
   }
 }
 
+async function handleStudyPhoto(event){
+  const file = event.target.files?.[0];
+  if(!file) return;
+
+  const supportedTypes = ["image/jpeg", "image/png", "image/webp"];
+  if(!supportedTypes.includes(file.type) || file.size > 12 * 1024 * 1024){
+    addMessage("Choose a JPG, PNG, or WebP study photo under 12 MB.", "ai");
+    event.target.value = "";
+    return;
+  }
+
+  try{
+    const bitmap = await createImageBitmap(file);
+    const scale = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+    const context = canvas.getContext("2d");
+    context.fillStyle = "#ffffff";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    bitmap.close();
+
+    let imageBlob;
+    for(const quality of [0.82, 0.68, 0.54, 0.4]){
+      imageBlob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", quality));
+      if(imageBlob && imageBlob.size <= 2 * 1024 * 1024) break;
+    }
+    if(!imageBlob || imageBlob.size > 2 * 1024 * 1024){
+      throw new Error("The photo could not be compressed small enough.");
+    }
+
+    selectedImageDataUrl = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(new Error("The photo could not be read."));
+      reader.readAsDataURL(imageBlob);
+    });
+    document.getElementById("photoThumbnail").src = selectedImageDataUrl;
+    document.getElementById("photoPreview").classList.add("show");
+  }catch(error){
+    removeStudyPhoto();
+    addMessage(error.message || "I couldn't load that photo. Please try another image.", "ai");
+  }
+}
+
+function removeStudyPhoto(){
+  selectedImageDataUrl = "";
+  document.getElementById("studyPhoto").value = "";
+  document.getElementById("photoThumbnail").removeAttribute("src");
+  document.getElementById("photoPreview").classList.remove("show");
+}
+
 async function sendMessage(){
   const input = document.getElementById("question");
   const sendButton = document.querySelector(".send");
-  const text = input.value.trim();
-  if(!text) return;
+  const typedQuestion = input.value.trim();
+  const imageDataUrl = selectedImageDataUrl;
+  if(!typedQuestion && !imageDataUrl) return;
+  const text = typedQuestion || "Please help me understand this study photo.";
 
-  addMessage(text, "user");
+  addMessage(text, "user", imageDataUrl);
   input.value = "";
+  removeStudyPhoto();
   sendButton.disabled = true;
   sendButton.textContent = "Thinking...";
 
   const { data, error } = await supabaseClient.functions.invoke("tutor", {
-    body: { question: text, subject: currentSubject, mode: currentMode }
+    body: { question: text, subject: currentSubject, mode: currentMode, imageDataUrl }
   });
 
   sendButton.disabled = false;
@@ -781,14 +863,27 @@ function getTutorErrorMessage(error){
   return "I couldn't reach the tutor right now. Please try again in a moment.";
 }
 
-function addMessage(text, type){
+function addMessage(text, type, imageUrl = ""){
   const chat = document.getElementById("chat");
   const message = document.createElement("div");
   message.className = "message " + type;
 
   const bubble = document.createElement("div");
   bubble.className = "bubble";
-  bubble.textContent = text;
+  if(imageUrl){
+    const image = document.createElement("img");
+    image.className = "message-image";
+    image.src = imageUrl;
+    image.alt = "Attached study material";
+    image.style.maxWidth = "220px";
+    image.style.maxHeight = "180px";
+    image.style.display = "block";
+    image.style.objectFit = "contain";
+    image.style.borderRadius = "6px";
+    image.style.marginBottom = text ? "8px" : "0";
+    bubble.appendChild(image);
+  }
+  if(text) bubble.appendChild(document.createTextNode(text));
 
   message.appendChild(bubble);
   chat.appendChild(message);
