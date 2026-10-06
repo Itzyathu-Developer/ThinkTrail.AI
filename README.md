@@ -1,104 +1,107 @@
 # ThinkTrail.AI
 
-ThinkTrail.AI is a browser-based study companion that helps students understand concepts instead of simply copying answers. It combines a guided tutor, practice and quiz modes, and a lightweight learning game with account-based progress tracking.
+ThinkTrail.AI is a friendly study companion built to help students learn with understanding instead of just getting quick answers. It combines guided tutoring, practice sessions, quizzes, and a lightweight game so learning feels active, encouraging, and motivating.
+
+## Why this project exists
+
+Many students need more than a final answer. They need structure, guided support, and steady progress. ThinkTrail.AI helps with that by offering:
+
+- step-by-step tutoring with hints before revealing answers
+- subject-based learning paths
+- practice and quiz modes for reinforcement
+- a playful Fraction Quest mini-game to keep momentum going
+- progress tracking with XP, profile stats, and account-based learning history
 
 ## Features
 
-- Step-by-step tutoring with hints before answers
-- Subject selection and guided study sessions
-- Practice and Quiz modes
-- Fraction Quest learning game
+- Guided study flow with hints and explanations
+- Subject selection for focused learning sessions
+- Practice mode and quiz mode
+- Fraction Quest game for quick engagement
 - XP and profile progress tracking
-- Email/password authentication with email verification
-- Google, Apple, and Microsoft sign-in through Supabase
-- Privacy Policy and Terms of Service pages
+- Email/password sign-up with email verification
+- Google, Apple, and Microsoft sign-in via Supabase
+- Privacy and terms pages for a complete app experience
 
-## Project Structure
+## Project structure
 
 ```text
 .
-├── index.html          # Main authenticated study experience
-├── config.js           # Supabase browser client configuration
+├── index.html                 # Main app experience for signed-in students
+├── config.js                  # Browser-side Supabase configuration
+├── privacy.html               # Privacy policy
+├── terms.html                 # Terms of service
+├── signin/
+│   └── index.html             # Sign-in and account creation flow
 ├── supabase/
-│   └── functions/tutor/ # Secure Groq tutor Edge Function
-├── privacy.html        # Privacy Policy
-├── terms.html          # Terms of Service
-└── signin/
-    └── index.html      # Sign-in and account creation
+│   └── functions/
+│       └── tutor/
+│           └── index.ts       # Secure Groq-powered tutor function
+└── README.md                  # Project overview and setup notes
 ```
 
-## Getting Started
+## Getting started
 
-This is a static HTML, CSS, and JavaScript project. No build step or package installation is required.
+This project is a static HTML, CSS, and JavaScript app, so there is no build step required.
 
-1. Serve the project directory with a local HTTP server.
-2. Open the server URL in a browser.
-3. Choose **Start a session** or sign in through the authentication page.
-
-For example, with Python installed:
+1. Open a terminal in the project folder.
+2. Start a simple local web server:
 
 ```bash
 python -m http.server 8000
 ```
 
-Then visit [http://localhost:8000](http://localhost:8000).
+3. Visit http://localhost:8000 in your browser.
+4. Sign in or choose Start a session to begin.
 
-Opening `index.html` directly with a `file://` URL may prevent OAuth redirects and other browser security-sensitive features from working correctly.
+> Opening the app with a file:// URL may cause problems with OAuth redirects and browser security checks.
 
-## Supabase Setup
+## Supabase setup
 
-The frontend uses the Supabase JavaScript client loaded from jsDelivr. `config.js` creates the shared Supabase client using the project URL and public anonymous key.
+The frontend uses the Supabase JavaScript client and a shared browser configuration in config.js.
 
-Before deploying:
+Before deployment:
 
 1. Create or select a Supabase project.
-2. Configure the authentication providers you want to offer.
-3. Add the local and production URLs to Supabase Authentication URL configuration.
-4. Create the `profiles` table and apply Row Level Security policies for authenticated users. The app reads a user profile and updates the user’s `xp` value.
-5. Confirm that email verification settings match the sign-up flow in `signin/index.html`.
+2. Enable the authentication providers you want to support.
+3. Add your local and production URLs under Supabase Authentication → URL Configuration.
+4. Create the profiles table and set up row-level security rules for authenticated users.
+5. Make sure your email verification settings match the sign-up flow in signin/index.html.
 
-The Supabase anonymous key is intended for browser use. Keep database access protected with appropriate Row Level Security policies, and never place a Supabase service-role key in frontend code.
+Keep the anonymous key in the browser only, and never expose a service-role secret in frontend code.
 
-## Groq Tutor Setup
+## Groq tutor setup
 
-The tutor calls Groq through `supabase/functions/tutor/index.ts`. The Groq API key must be stored as a Supabase secret, not in the frontend:
-
-```bash
-supabase secrets set GROQ_API_KEY=your_groq_api_key
-supabase functions deploy tutor
-```
-
-The function uses Groq's `llama-3.3-70b-versatile` model and receives the student's question, selected subject, and tutor mode. Make sure the Supabase CLI is linked to the project before deploying:
+The AI tutor is powered by the Supabase edge function in supabase/functions/tutor/index.ts. The Groq API key should be stored as a Supabase secret, not in the frontend.
 
 ```bash
 supabase login
 supabase link --project-ref your_project_ref
+supabase secrets set GROQ_API_KEY=your_groq_api_key
+supabase functions deploy tutor
 ```
+
+This function uses Groq's llama-3.3-70b-versatile model to answer student questions with context-specific tutoring.
 
 ## Deployment with Vercel
 
-This repository is configured as a no-build Vercel static site. Deploy it from the project root with the Vercel CLI:
+After deployment, add your production URL to the Supabase Auth settings:
 
-```bash
-npx vercel
-```
+- Site URL: https://your-project.vercel.app
+- Redirect URL: https://your-project.vercel.app/**
 
-For a production deployment:
+Also add any custom domain you use. The OAuth redirect in signin/index.html uses the current deployed origin automatically.
 
-```bash
-npx vercel --prod
-```
-
-Or import the repository in the Vercel dashboard and leave the framework preset as **Other**. No build command or output directory is required. The included `vercel.json` provides clean routes for `/signin`, `/privacy`, and `/terms`.
-
-After deployment, add the production URL to Supabase Authentication → URL Configuration:
-
-- Site URL: `https://your-project.vercel.app`
-- Redirect URL: `https://your-project.vercel.app/**`
-
-Also add any custom domain you use. The OAuth callback in `signin/index.html` automatically uses the current deployed origin.
-
-## Legal Pages
+## Legal pages
 
 - [Privacy Policy](privacy.html)
-- [Terms of Service](terms.html)  
+- [Terms of Service](terms.html)
+
+## License
+
+This project does not currently include a license file. If you plan to share or deploy it publicly, you may want to add one that matches your intended usage and distribution rules.
+
+## Contributing
+
+Contributions are welcome if you want to improve the learning experience, add new subjects, fix bugs, or refine the tutor flow. If you are building on this project, keep the app student-friendly, accessible, and focused on learning rather than shortcutting answers.
+
