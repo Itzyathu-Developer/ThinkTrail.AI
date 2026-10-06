@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ThinkTrail.AI — Study with a tutor who explains, not just answers</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
@@ -381,6 +382,9 @@ main{width:min(1180px,92%);margin:0 auto;padding:60px 0 90px;}
 .message.ai .bubble{border-bottom-left-radius:4px;}
 .message.ai .bubble strong{color:var(--forest-light);}
 .message.user .bubble strong{color:#EAF1EA;}
+.answer-sources{display:grid;gap:4px;margin-top:12px;padding-top:9px;border-top:1px solid var(--rule);font-size:12px;}
+.answer-sources strong{color:var(--muted);}
+.answer-sources a{width:fit-content;color:var(--forest);text-decoration:underline;text-underline-offset:2px;}
 
 .input-area{
   border:1px solid var(--rule);
@@ -420,6 +424,7 @@ textarea{
 .image-search-result a{display:block;padding:2px 8px;color:var(--forest);font-size:10px;}
 .image-search-result button{width:calc(100% - 16px);margin:6px 8px 8px;padding:6px;border:1px solid var(--rule);border-radius:6px;font-size:11px;font-weight:600;}
 .image-search-result button:hover{background:#F1F0E8;}
+.image-search-result .image-download{margin-top:0;color:var(--forest);}
 
 .input-bottom{display:flex;justify-content:space-between;align-items:center;padding:0 4px;}
 
@@ -568,7 +573,7 @@ footer strong{color:#fff;font-weight:600;}
 
 <nav class="nav">
   <div class="logo">
-    <div class="logo-mark">L</div>
+    <div class="logo-mark">T</div>
     ThinkTrail.AI
   </div>
   <div class="nav-right">
@@ -640,7 +645,7 @@ footer strong{color:#fff;font-weight:600;}
 
   <div class="tutor-top">
     <div class="tutor-title">
-      <div class="ai-icon">L</div>
+      <div class="ai-icon">T</div>
       <div>
         <h2>ThinkTrail.AI Tutor</h2>
         <p id="subjectLabel">Ready to help with Math</p>
@@ -762,6 +767,7 @@ let xp = 120;
 let currentUser = null;
 let currentProfileName = "";
 let currentGame = null;
+const conversationHistory = [];
 
 // ---- Auth guard + profile load ----
 (async function initAuth(){
@@ -997,7 +1003,12 @@ async function searchStudyImages(){
       useButton.type = "button";
       useButton.textContent = "Ask tutor about this";
       useButton.addEventListener("click", () => useStudyImage(info.thumburl, page.title));
-      card.append(image, title, source, useButton);
+      const downloadButton = document.createElement("button");
+      downloadButton.className = "image-download";
+      downloadButton.type = "button";
+      downloadButton.textContent = "Download image";
+      downloadButton.addEventListener("click", () => downloadStudyImage(info.thumburl, page.title));
+      card.append(image, title, source, useButton, downloadButton);
       results.appendChild(card);
     });
     if(!results.childElementCount) status.textContent = "No usable images found. Try another study topic.";
@@ -1026,6 +1037,29 @@ async function useStudyImage(imageUrl, title){
   }
 }
 
+async function downloadStudyImage(imageUrl, title){
+  const status = document.getElementById("imageSearchStatus");
+  try{
+    const parsedUrl = new URL(imageUrl);
+    if(parsedUrl.protocol !== "https:" || !["upload.wikimedia.org", "thumb.wikimedia.org"].includes(parsedUrl.hostname)) throw new Error("That image source is not supported.");
+    const response = await fetch(parsedUrl.href, { mode: "cors", credentials: "omit" });
+    if(!response.ok) throw new Error("Could not download that image. Try another result.");
+    const imageBlob = await response.blob();
+    if(imageBlob.size > 12 * 1024 * 1024) throw new Error("That image is too large to download here.");
+    const objectUrl = URL.createObjectURL(imageBlob);
+    const anchor = document.createElement("a");
+    anchor.href = objectUrl;
+    anchor.download = title.replace(/^File:/, "").replace(/[^a-z0-9._-]+/gi, "-").slice(0, 100) || "study-image";
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+    status.textContent = "Image download started.";
+  }catch(error){
+    status.textContent = error.message || "Image download failed. Please try again.";
+  }
+}
+
 function removeStudyPhoto(){
   selectedImageDataUrl = "";
   document.getElementById("studyPhoto").value = "";
@@ -1040,6 +1074,7 @@ async function sendMessage(){
   const imageDataUrl = selectedImageDataUrl;
   if(!typedQuestion && !imageDataUrl) return;
   const text = typedQuestion || "Please help me understand this study photo.";
+  const history = conversationHistory.slice(-10);
 
   addMessage(text, "user", imageDataUrl);
   input.value = "";
@@ -1048,7 +1083,7 @@ async function sendMessage(){
   sendButton.textContent = "Thinking...";
 
   const { data, error } = await supabaseClient.functions.invoke("tutor", {
-    body: { question: text, subject: currentSubject, mode: currentMode, imageDataUrl }
+    body: { question: text, subject: currentSubject, mode: currentMode, imageDataUrl, history }
   });
 
   sendButton.disabled = false;
@@ -1062,7 +1097,12 @@ async function sendMessage(){
     return;
   }
 
-  addMessage(data.answer, "ai");
+  conversationHistory.push(
+    { role: "user", content: imageDataUrl ? `${text} [A study photo was attached.]` : text },
+    { role: "assistant", content: data.answer }
+  );
+  if(conversationHistory.length > 10) conversationHistory.splice(0, conversationHistory.length - 10);
+  addMessage(data.answer, "ai", "", data.sources);
 }
 
 function getTutorErrorMessage(error){
@@ -1083,7 +1123,7 @@ function getTutorErrorMessage(error){
   return "I couldn't reach the tutor right now. Please try again in a moment.";
 }
 
-function addMessage(text, type, imageUrl = ""){
+function addMessage(text, type, imageUrl = "", sources = []){
   const chat = document.getElementById("chat");
   const message = document.createElement("div");
   message.className = "message " + type;
@@ -1104,6 +1144,26 @@ function addMessage(text, type, imageUrl = ""){
     bubble.appendChild(image);
   }
   if(text) bubble.appendChild(document.createTextNode(text));
+  if(type === "ai" && Array.isArray(sources) && sources.length){
+    const sourceList = document.createElement("div");
+    sourceList.className = "answer-sources";
+    const label = document.createElement("strong");
+    label.textContent = "Sources";
+    sourceList.appendChild(label);
+    sources.forEach(source => {
+      if(typeof source?.title !== "string" || typeof source?.url !== "string") return;
+      let url;
+      try{ url = new URL(source.url); }catch{ return; }
+      if(url.protocol !== "https:" || url.username || url.password) return;
+      const link = document.createElement("a");
+      link.href = url.href;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.textContent = source.title;
+      sourceList.appendChild(link);
+    });
+    if(sourceList.querySelector("a")) bubble.appendChild(sourceList);
+  }
 
   message.appendChild(bubble);
   chat.appendChild(message);

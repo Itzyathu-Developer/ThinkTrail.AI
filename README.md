@@ -81,7 +81,13 @@ supabase secrets set GROQ_API_KEY=your_groq_api_key
 supabase functions deploy tutor
 ```
 
-This function uses Groq's llama-3.3-70b-versatile model to answer student questions with context-specific tutoring.
+The tutor uses Groq for answers and vision, and Tavily keyless Search for broad web sources by default (rate-limited). For higher search usage, optionally add a Tavily API key as the server-side secret `TAVILY_API_KEY`; it is never included in frontend code:
+
+```bash
+supabase secrets set TAVILY_API_KEY=your_tavily_api_key
+```
+
+Web search can return indexed sources from across the internet, potentially including Pinterest. Source quality varies, so the tutor cites links and should prefer authoritative educational materials. Exact textbook page contents are only confirmed when the relevant page text or image is actually available to the tutor.
 
 ## Deployment with Vercel
 
