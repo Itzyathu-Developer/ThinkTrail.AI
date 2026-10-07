@@ -2,7 +2,7 @@
 
 ThinkTrail.AI is a friendly study companion built to help students learn with understanding instead of just getting quick answers. It combines guided tutoring, practice sessions, quizzes, and a lightweight game so learning feels active, encouraging, and motivating.
 
-## Why this project exists
+## Why this project exists 
 
 Many students need more than a final answer. They need structure, guided support, and steady progress. ThinkTrail.AI helps with that by offering:
 
