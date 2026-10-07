@@ -134,7 +134,7 @@ button{cursor:pointer;border:0;background:none;}
 }
 .avatar-menu button:hover{background:#F1F0E8;}
 
-.profile-dialog{width:min(420px,calc(100% - 32px));margin:auto;border:1px solid var(--rule);border-radius:12px;padding:24px;background:var(--paper-card);color:var(--text);box-shadow:0 24px 80px rgba(0,0,0,.3);}
+ .profile-dialog{width:min(420px,calc(100% - 32px));margin:auto;border:1px solid var(--rule);border-radius:12px;padding:24px;background:var(--paper-card);color:var(--text);box-shadow:0 24px 80px rgba(0,0,0,.3);}
 .profile-dialog::backdrop{background:rgba(12,22,16,.58);}
 .profile-dialog h2{font-size:24px;margin-bottom:6px;}
 .profile-dialog p{font-size:13px;color:var(--muted);margin-bottom:18px;}
@@ -145,6 +145,118 @@ button{cursor:pointer;border:0;background:none;}
 .profile-cancel{border:1px solid var(--rule);}
 .profile-save{background:var(--forest);color:#fff;}
 .profile-status{min-height:18px;margin-top:10px;color:var(--muted);font-size:12px;}
+
+.profile-modal{
+  position:fixed;
+  inset:0;
+  display:none;
+  place-items:center;
+  background:rgba(11,19,17,.42);
+  z-index:80;
+  padding:20px;
+}
+.profile-modal.show{display:grid;}
+
+.profile-modal-card{
+  width:min(560px,100%);
+  background:#fff;
+  border:1px solid var(--rule);
+  border-radius:16px;
+  padding:22px 22px 18px;
+  box-shadow:0 30px 60px rgba(0,0,0,.22);
+}
+
+.profile-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:18px;
+}
+
+.profile-header h3{
+  font-size:18px;
+  font-weight:600;
+  color:var(--ink);
+}
+
+.profile-close{
+  border:1px solid var(--rule);
+  background:#F6F2EA;
+  color:var(--ink);
+  width:32px;
+  height:32px;
+  border-radius:50%;
+  font-size:20px;
+  line-height:1;
+}
+
+.profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.profile-field{display:flex;flex-direction:column;gap:8px;grid-column:span 2;}
+.profile-field.half{grid-column:span 1;}
+.profile-field label{
+  font-size:12px;
+  font-weight:600;
+  color:var(--muted);
+}
+.profile-field input,
+.profile-field textarea,
+.profile-field select{
+  width:100%;
+  border:1px solid var(--rule);
+  border-radius:10px;
+  background:#fff;
+  padding:11px 12px;
+  font:inherit;
+  resize:vertical;
+  color:var(--ink);
+}
+.profile-field textarea{min-height:98px;}
+
+.focus-chips{display:flex;flex-wrap:wrap;gap:8px;}
+.focus-chip{
+  border:1px solid var(--rule);
+  background:#F7F5F0;
+  border-radius:999px;
+  padding:8px 12px;
+  font-size:12px;
+  font-weight:600;
+  color:var(--text);
+}
+.focus-chip.selected{
+  background:rgba(47,82,51,.12);
+  border-color:rgba(47,82,51,.3);
+  color:var(--forest);
+}
+
+.reward-summary{
+  border:1px solid rgba(217,142,63,.25);
+  background:rgba(217,142,63,.08);
+  border-radius:12px;
+  padding:12px 14px;
+  margin-top:6px;
+}
+.reward-summary strong{color:var(--forest);}
+
+.modal-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  margin-top:18px;
+}
+.modal-actions button{
+  border-radius:10px;
+  padding:10px 18px;
+  font-weight:600;
+}
+.modal-actions .secondary{
+  background:#F3EFE8;
+  color:var(--ink);
+  border:1px solid var(--rule);
+}
+.modal-actions .primary{
+  background:var(--forest);
+  color:#fff;
+}
 
 /* ---------- HERO ---------- */
 .hero{
@@ -583,8 +695,8 @@ footer strong{color:#fff;font-weight:600;}
       <button class="avatar" id="avatarBtn">•</button>
       <div class="avatar-menu" id="avatarMenu">
         <div class="avatar-menu-email" id="avatarEmail">Loading…</div>
-        <button type="button" onclick="openProfileSettings()">Profile settings</button>
-        <button onclick="signOut()">Sign out</button>
+        <button type="button" onclick="openProfileModal()">Profile settings</button>
+        <button type="button" onclick="signOut()">Sign out</button>
       </div>
     </div>
   </div>
@@ -736,6 +848,64 @@ footer strong{color:#fff;font-weight:600;}
 
 </main>
 
+<div class="profile-modal" id="profileModal" aria-hidden="true">
+  <div class="profile-modal-card" role="dialog" aria-modal="true" aria-labelledby="profileTitle">
+    <div class="profile-header">
+      <h3 id="profileTitle">Profile settings</h3>
+      <button class="profile-close" type="button" aria-label="Close profile settings" onclick="closeProfileModal()">×</button>
+    </div>
+
+    <form id="profileForm">
+      <div class="profile-grid">
+        <div class="profile-field half">
+          <label for="displayNameInput">Display name</label>
+          <input id="displayNameInput" type="text" maxlength="32" placeholder="Your name" />
+        </div>
+
+        <div class="profile-field half">
+          <label for="rewardGoalInput">Reward goal</label>
+          <input id="rewardGoalInput" type="text" maxlength="80" placeholder="Unlock a mastery badge" />
+        </div>
+
+        <div class="profile-field">
+          <label for="bioInput">Bio</label>
+          <textarea id="bioInput" placeholder="Tell people how you like to study..."></textarea>
+        </div>
+
+        <div class="profile-field">
+          <label>Focus areas</label>
+          <div class="focus-chips" id="focusChips">
+            <button type="button" class="focus-chip selected" data-subject="Math">Math</button>
+            <button type="button" class="focus-chip selected" data-subject="Science">Science</button>
+            <button type="button" class="focus-chip" data-subject="English">English</button>
+            <button type="button" class="focus-chip" data-subject="History">History</button>
+            <button type="button" class="focus-chip" data-subject="Languages">Languages</button>
+            <button type="button" class="focus-chip" data-subject="Other">Other</button>
+          </div>
+        </div>
+
+        <div class="profile-field">
+          <label for="studyMaterialsInput">Study materials</label>
+          <textarea id="studyMaterialsInput" placeholder="Examples: textbook, notes, flashcards, revision sheet"></textarea>
+        </div>
+
+        <div class="profile-field">
+          <label>XP reward tracker</label>
+          <div class="reward-summary">
+            <div><strong id="rewardSummaryText">Current goal</strong></div>
+            <div id="rewardSummaryMeta">0 XP earned</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="secondary" onclick="closeProfileModal()">Cancel</button>
+        <button type="submit" class="primary">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <footer>
   <div><strong>ThinkTrail.AI</strong> — an Itzyathu product</div>
   <div>Developer: Yatharth G. Bochare</div>
@@ -758,6 +928,8 @@ footer strong{color:#fff;font-weight:600;}
 
 <script>
 
+const PROFILE_STORAGE_KEY = "thinktrail.profile.settings.v1";
+
 let currentSubject = "Math";
 let currentMode = "Learn";
 let selectedImageDataUrl = "";
@@ -768,8 +940,145 @@ let currentUser = null;
 let currentProfileName = "";
 let currentGame = null;
 const conversationHistory = [];
+const profileState = {
+  name: "",
+  bio: "",
+  focusAreas: ["Math", "Science"],
+  studyMaterials: "",
+  rewardGoal: "Unlock a mastery badge",
+  streak: 0
+};
 
-// ---- Auth guard + profile load ----
+function readStoredProfileSettings(){
+  try {
+    const raw = localStorage.getItem(PROFILE_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveStoredProfileSettings(data){
+  localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(data));
+}
+
+function getDisplayNameFallback(email){
+  return (email || "Student").split("@")[0].replace(/[._-]+/g, " ").trim() || "Student";
+}
+
+async function ensureProfileRecord(user){
+  const fallbackName = getDisplayNameFallback(user.email);
+  const { data: profile, error } = await supabaseClient
+    .from("profiles")
+    .select("id, name, email, streak, xp")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (error && error.code !== "PGRST116") {
+    console.warn("Profile lookup warning:", error);
+  }
+
+  if (!profile) {
+    const insertPayload = {
+      id: user.id,
+      name: fallbackName,
+      email: user.email,
+      streak: 0,
+      xp: 120
+    };
+
+    const { data: createdProfile, error: insertError } = await supabaseClient
+      .from("profiles")
+      .insert(insertPayload)
+      .select("id, name, email, streak, xp")
+      .single();
+
+    if (insertError) {
+      console.warn("Profile insert warning:", insertError);
+      return { id: user.id, name: fallbackName, email: user.email, streak: 0, xp: 120 };
+    }
+
+    return createdProfile;
+  }
+
+  return profile;
+}
+
+function refreshRewardSummary(){
+  const summaryText = document.getElementById("rewardSummaryText");
+  const summaryMeta = document.getElementById("rewardSummaryMeta");
+  const nextGoal = profileState.rewardGoal || "Unlock a mastery badge";
+  const xpNeeded = Math.max(0, 250 - xp);
+
+  if (summaryText) summaryText.textContent = nextGoal;
+  if (summaryMeta) summaryMeta.textContent = xp + " XP earned • " + (xpNeeded ? xpNeeded + " XP to next reward" : "Reward unlocked");
+}
+
+function renderProfileFormFromState(){
+  const displayNameInput = document.getElementById("displayNameInput");
+  const bioInput = document.getElementById("bioInput");
+  const rewardGoalInput = document.getElementById("rewardGoalInput");
+  const studyMaterialsInput = document.getElementById("studyMaterialsInput");
+
+  if (displayNameInput) displayNameInput.value = profileState.name || "";
+  if (bioInput) bioInput.value = profileState.bio || "";
+  if (rewardGoalInput) rewardGoalInput.value = profileState.rewardGoal || "";
+  if (studyMaterialsInput) studyMaterialsInput.value = profileState.studyMaterials || "";
+
+  document.querySelectorAll(".focus-chip").forEach((chip) => {
+    const isSelected = profileState.focusAreas.includes(chip.dataset.subject);
+    chip.classList.toggle("selected", isSelected);
+  });
+
+  refreshRewardSummary();
+}
+
+function openProfileModal(){
+  renderProfileFormFromState();
+  document.getElementById("profileModal").classList.add("show");
+  document.getElementById("profileModal").setAttribute("aria-hidden", "false");
+  document.getElementById("avatarMenu").classList.remove("show");
+}
+
+function closeProfileModal(){
+  document.getElementById("profileModal").classList.remove("show");
+  document.getElementById("profileModal").setAttribute("aria-hidden", "true");
+}
+
+async function hydrateProfileFromDb(profile){
+  const stored = readStoredProfileSettings();
+  const fallbackName = getDisplayNameFallback(currentUser?.email || profile?.email || "Student");
+
+  profileState.name = profile?.name || stored.name || fallbackName;
+  profileState.bio = stored.bio || "";
+  profileState.focusAreas = Array.isArray(stored.focusAreas) && stored.focusAreas.length ? stored.focusAreas : ["Math", "Science"];
+  profileState.studyMaterials = stored.studyMaterials || "";
+  profileState.rewardGoal = stored.rewardGoal || "Unlock a mastery badge";
+  profileState.streak = Number(profile?.streak ?? stored.streak ?? 0);
+
+  if (profile?.xp != null) {
+    xp = Number(profile.xp);
+  } else if (stored.xp != null) {
+    xp = Number(stored.xp);
+  }
+
+  currentProfileName = profileState.name.trim() || fallbackName;
+  const initial = currentProfileName.charAt(0).toUpperCase();
+
+  const avatarBtn = document.getElementById("avatarBtn");
+  const avatarEmail = document.getElementById("avatarEmail");
+  const streakBadge = document.getElementById("streakBadge");
+  const xpCounter = document.getElementById("xpCounter");
+
+  if (avatarBtn) avatarBtn.textContent = initial;
+  if (avatarEmail) avatarEmail.textContent = currentUser.email;
+  if (streakBadge) streakBadge.textContent = profileState.streak + " day streak";
+  if (xpCounter) xpCounter.textContent = xp + " XP";
+  if (document.getElementById("profileNameInput")) document.getElementById("profileNameInput").value = currentProfileName;
+
+  refreshRewardSummary();
+}
+
 (async function initAuth(){
   const { data: { session } } = await supabaseClient.auth.getSession();
 
@@ -781,24 +1090,24 @@ const conversationHistory = [];
   document.querySelectorAll(".app-only").forEach(element => { element.hidden = false; });
   document.querySelectorAll(".public-only").forEach(element => { element.hidden = true; });
 
-  const { data: profile } = await supabaseClient
-    .from("profiles")
-    .select("name, email, streak, xp")
-    .eq("id", currentUser.id)
-    .single();
-
-  const displayName = profile?.name || currentUser.email;
-  currentProfileName = profile?.name || "";
-  const initial = displayName.trim().charAt(0).toUpperCase();
-
-  document.getElementById("avatarBtn").textContent = initial;
-  document.getElementById("avatarEmail").textContent = currentUser.email;
-  document.getElementById("streakBadge").textContent =
-    (profile?.streak ?? 0) + " day streak";
-
-  if(profile?.xp != null){
-    xp = profile.xp;
-    document.getElementById("xpCounter").textContent = xp + " XP";
+  try {
+    const profile = await ensureProfileRecord(currentUser);
+    await hydrateProfileFromDb(profile);
+  } catch (error) {
+    console.error("Profile hydration failed:", error);
+    const fallbackName = getDisplayNameFallback(currentUser.email);
+    profileState.name = fallbackName;
+    profileState.streak = 0;
+    xp = 120;
+    currentProfileName = fallbackName;
+    const avatarBtn = document.getElementById("avatarBtn");
+    const avatarEmail = document.getElementById("avatarEmail");
+    const streakBadge = document.getElementById("streakBadge");
+    const xpCounter = document.getElementById("xpCounter");
+    if (avatarBtn) avatarBtn.textContent = fallbackName.charAt(0).toUpperCase();
+    if (avatarEmail) avatarEmail.textContent = currentUser.email;
+    if (streakBadge) streakBadge.textContent = "0 day streak";
+    if (xpCounter) xpCounter.textContent = "120 XP";
   }
 })();
 
@@ -809,9 +1118,55 @@ document.getElementById("avatarBtn").addEventListener("click", function(){
 document.addEventListener("click", function(e){
   const menu = document.getElementById("avatarMenu");
   const btn = document.getElementById("avatarBtn");
-  if(!menu.contains(e.target) && e.target !== btn){
+  if(menu && btn && !menu.contains(e.target) && e.target !== btn){
     menu.classList.remove("show");
   }
+});
+
+document.querySelectorAll(".focus-chip").forEach((chip) => {
+  chip.addEventListener("click", () => {
+    chip.classList.toggle("selected");
+  });
+});
+
+document.getElementById("profileForm").addEventListener("submit", async function(event){
+  event.preventDefault();
+
+  const selectedFocus = Array.from(document.querySelectorAll(".focus-chip.selected")).map((button) => button.dataset.subject);
+
+  profileState.name = document.getElementById("displayNameInput").value.trim() || getDisplayNameFallback(currentUser?.email || "Student");
+  profileState.bio = document.getElementById("bioInput").value.trim();
+  profileState.focusAreas = selectedFocus.length ? selectedFocus : ["Math"];
+  profileState.studyMaterials = document.getElementById("studyMaterialsInput").value.trim();
+  profileState.rewardGoal = document.getElementById("rewardGoalInput").value.trim() || "Unlock a mastery badge";
+
+  const stored = readStoredProfileSettings();
+  const nextSettings = {
+    ...stored,
+    name: profileState.name,
+    bio: profileState.bio,
+    focusAreas: profileState.focusAreas,
+    studyMaterials: profileState.studyMaterials,
+    rewardGoal: profileState.rewardGoal,
+    xp,
+    streak: profileState.streak
+  };
+  saveStoredProfileSettings(nextSettings);
+
+  currentProfileName = profileState.name;
+  document.getElementById("avatarBtn").textContent = profileState.name.charAt(0).toUpperCase();
+  document.getElementById("streakBadge").textContent = profileState.streak + " day streak";
+  refreshRewardSummary();
+
+  if (currentUser) {
+    await supabaseClient.from("profiles").update({
+      name: profileState.name,
+      xp,
+      streak: profileState.streak
+    }).eq("id", currentUser.id);
+  }
+
+  closeProfileModal();
 });
 
 async function signOut(){
@@ -824,6 +1179,10 @@ function openProfileSettings(){
   document.getElementById("profileNameInput").value = currentProfileName;
   document.getElementById("profileStatus").textContent = "";
   document.getElementById("profileDialog").showModal();
+}
+
+function openProfileModalAlias(){
+  openProfileModal();
 }
 
 async function saveProfileSettings(){
@@ -848,8 +1207,11 @@ async function saveProfileSettings(){
   }
 
   currentProfileName = name;
-  document.getElementById("avatarBtn").textContent = name.charAt(0).toUpperCase();
-  document.getElementById("avatarEmail").textContent = currentUser.email;
+  profileState.name = name;
+  const avatarBtn = document.getElementById("avatarBtn");
+  if (avatarBtn) avatarBtn.textContent = name.charAt(0).toUpperCase();
+  const avatarEmail = document.getElementById("avatarEmail");
+  if (avatarEmail) avatarEmail.textContent = currentUser.email;
   document.getElementById("profileDialog").close();
 }
 
@@ -901,34 +1263,34 @@ async function handleStudyPhoto(event){
 
 async function setStudyPhoto(sourceBlob){
   const bitmap = await createImageBitmap(sourceBlob);
-    const scale = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height));
-    const canvas = document.createElement("canvas");
-    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
-    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
-    const context = canvas.getContext("2d");
-    context.fillStyle = "#ffffff";
-    context.fillRect(0, 0, canvas.width, canvas.height);
-    context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-    bitmap.close();
+  const scale = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+  canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+  const context = canvas.getContext("2d");
+  context.fillStyle = "#ffffff";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
 
-    let imageBlob;
-    for(const quality of [0.82, 0.68, 0.54, 0.4]){
-      imageBlob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", quality));
-      if(imageBlob && imageBlob.size <= 2 * 1024 * 1024) break;
-    }
-    if(!imageBlob || imageBlob.size > 2 * 1024 * 1024){
-      throw new Error("The photo could not be compressed small enough.");
-    }
+  let imageBlob;
+  for(const quality of [0.82, 0.68, 0.54, 0.4]){
+    imageBlob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", quality));
+    if(imageBlob && imageBlob.size <= 2 * 1024 * 1024) break;
+  }
+  if(!imageBlob || imageBlob.size > 2 * 1024 * 1024){
+    throw new Error("The photo could not be compressed small enough.");
+  }
 
-    selectedImageDataUrl = await new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = () => reject(new Error("The photo could not be read."));
-      reader.readAsDataURL(imageBlob);
-    });
-    document.getElementById("photoThumbnail").src = selectedImageDataUrl;
-    document.getElementById("photoPreview").classList.add("show");
-    document.getElementById("photoStatus").textContent = "Photo ready to ask about";
+  selectedImageDataUrl = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error("The photo could not be read."));
+    reader.readAsDataURL(imageBlob);
+  });
+  document.getElementById("photoThumbnail").src = selectedImageDataUrl;
+  document.getElementById("photoPreview").classList.add("show");
+  document.getElementById("photoStatus").textContent = "Photo ready to ask about";
 }
 
 function handleImageSearchKey(event){
@@ -1201,9 +1563,10 @@ async function gameAnswer(button){
   if(isCorrect){
     xp += 25;
     document.getElementById("xpCounter").textContent = xp + " XP";
+    refreshRewardSummary();
     feedback.textContent = `Correct! +25 XP. ${currentGame.explanation}`;
     if(currentUser) await supabaseClient.from("profiles").update({ xp }).eq("id", currentUser.id);
-  }else{
+  } else {
     feedback.textContent = `Not quite. ${currentGame.explanation}`;
   }
 }
