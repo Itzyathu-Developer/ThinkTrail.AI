@@ -10,6 +10,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/marked@15.0.12/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
 
 <style>
 :root{
@@ -647,6 +652,17 @@ main{width:min(1180px,92%);margin:0 auto;padding:30px 0 90px;}
 .message.ai .bubble{border-bottom-left-radius:4px;}
 .message.ai .bubble strong{color:var(--forest-light);}
 .message.user .bubble strong{color:#EAF1EA;}
+.message.ai .bubble > :first-child{margin-top:0;}
+.message.ai .bubble > :last-child{margin-bottom:0;}
+.message.ai .bubble p + p{margin-top:10px;}
+.message.ai .bubble h1,.message.ai .bubble h2,.message.ai .bubble h3{margin:12px 0 6px;font-family:'IBM Plex Sans',sans-serif;font-size:15px;font-weight:700;}
+.message.ai .bubble ul,.message.ai .bubble ol{margin:8px 0 8px 22px;padding:0;}
+.message.ai .bubble li + li{margin-top:4px;}
+.message.ai .bubble pre{max-width:100%;overflow-x:auto;margin:10px 0;padding:10px;border-radius:7px;background:#e8e8de;font:12px/1.5 'IBM Plex Mono',monospace;}
+.message.ai .bubble code{padding:1px 4px;border-radius:4px;background:rgba(22,38,28,.08);font:12px 'IBM Plex Mono',monospace;}
+.message.ai .bubble pre code{padding:0;background:none;}
+.message.ai .bubble .katex-display{max-width:100%;overflow-x:auto;overflow-y:hidden;padding:3px 0;margin:10px 0;}
+.message.ai .bubble a{color:var(--forest);text-decoration:underline;text-underline-offset:2px;}
 .answer-sources{display:grid;gap:4px;margin-top:12px;padding-top:9px;border-top:1px solid var(--rule);font-size:12px;}
 .answer-sources strong{color:var(--muted);}
 .answer-sources a{width:fit-content;color:var(--forest);text-decoration:underline;text-underline-offset:2px;}
@@ -2025,6 +2041,60 @@ function getTutorErrorMessage(error){
   return "I couldn't reach the tutor right now. Please try again in a moment.";
 }
 
+function renderAssistantMarkdown(bubble, text){
+  if(!window.marked || !window.DOMPurify){
+    bubble.appendChild(document.createTextNode(text));
+    return;
+  }
+
+  try{
+    const equations = [];
+    const protectedText = text.replace(/\\\[[\s\S]+?\\\]|\\\([\s\S]+?\\\)|\$\$[\s\S]+?\$\$|\$(?:\\.|[^$\n])+\$/g, (source) => {
+      const token = `THINKTRAILMATHTOKEN${equations.length}END`;
+      equations.push({ token, source });
+      return token;
+    });
+    const markdownHtml = window.marked.parse(protectedText, { breaks: true, gfm: true });
+    bubble.innerHTML = window.DOMPurify.sanitize(markdownHtml, {
+      USE_PROFILES: { html: true },
+      FORBID_TAGS: ["img", "iframe", "object", "embed", "style", "form", "input", "button", "textarea", "select", "video", "audio", "source"],
+      FORBID_ATTR: ["style"]
+    });
+
+    equations.forEach(({ token, source }) => {
+      const walker = document.createTreeWalker(bubble, NodeFilter.SHOW_TEXT);
+      while(walker.nextNode()){
+        const textNode = walker.currentNode;
+        if(!textNode.nodeValue.includes(token)) continue;
+        const fragment = document.createDocumentFragment();
+        const parts = textNode.nodeValue.split(token);
+        parts.forEach((part, index) => {
+          if(part) fragment.appendChild(document.createTextNode(part));
+          if(index < parts.length - 1) fragment.appendChild(document.createTextNode(source));
+        });
+        textNode.replaceWith(fragment);
+        break;
+      }
+    });
+
+    if(window.renderMathInElement){
+      window.renderMathInElement(bubble, {
+        delimiters: [
+          { left: "$$", right: "$$", display: true },
+          { left: "\\[", right: "\\]", display: true },
+          { left: "\\(", right: "\\)", display: false },
+          { left: "$", right: "$", display: false }
+        ],
+        throwOnError: false,
+        strict: "ignore"
+      });
+    }
+  }catch(error){
+    console.warn("Tutor formatting could not be rendered:", error);
+    bubble.textContent = text;
+  }
+}
+
 function addMessage(text, type, imageUrl = "", sources = []){
   const chat = document.getElementById("chat");
   const message = document.createElement("div");
@@ -2045,7 +2115,11 @@ function addMessage(text, type, imageUrl = "", sources = []){
     image.style.marginBottom = text ? "8px" : "0";
     bubble.appendChild(image);
   }
-  if(text) bubble.appendChild(document.createTextNode(text));
+  if(text && type === "ai" && window.marked && window.DOMPurify) {
+    renderAssistantMarkdown(bubble, text);
+  } else if(text) {
+    bubble.appendChild(document.createTextNode(text));
+  }
   if(type === "ai" && Array.isArray(sources) && sources.length){
     const sourceList = document.createElement("div");
     sourceList.className = "answer-sources";
