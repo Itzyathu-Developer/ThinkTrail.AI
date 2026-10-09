@@ -55,6 +55,19 @@ button{cursor:pointer;border:0;background:none;}
 
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation-duration:.001ms !important; transition-duration:.001ms !important;}
+  html{scroll-behavior:auto;}
+}
+
+@media (prefers-reduced-motion: no-preference){
+  .motion-ready .motion-reveal{opacity:1;translate:0 0;}
+  .motion-ready .motion-reveal.is-visible{animation:section-lift-in .62s cubic-bezier(.2,.7,.25,1) both;}
+  @keyframes section-lift-in{from{translate:0 10px}to{translate:0 0}}
+  .motion-ready .path-step:nth-of-type(1){transition-delay:0ms;}
+  .motion-ready .path-step:nth-of-type(2){transition-delay:90ms;}
+  .motion-ready .path-step:nth-of-type(3){transition-delay:180ms;}
+  .motion-ready .feature:nth-child(1){transition-delay:0ms;}
+  .motion-ready .feature:nth-child(2){transition-delay:90ms;}
+  .motion-ready .feature:nth-child(3){transition-delay:180ms;}
 }
 
 /* ---------- NAV ---------- */
@@ -460,8 +473,10 @@ button{cursor:pointer;border:0;background:none;}
   padding:24px;
   color:var(--text);
   box-shadow:0 30px 60px rgba(0,0,0,.35);
-  transform:rotate(1.2deg);
+  transform:perspective(900px) rotateX(var(--demo-tilt-x,0deg)) rotateY(var(--demo-tilt-y,0deg)) rotate(1.2deg);
+  transition:transform .28s cubic-bezier(.2,.7,.25,1),box-shadow .28s ease;
 }
+.hero-card:hover{box-shadow:0 36px 72px rgba(0,0,0,.4);}
 
 .hero-card::before{
   content:"";
@@ -521,6 +536,12 @@ button{cursor:pointer;border:0;background:none;}
 .preview-feedback{min-height:20px;margin:0;color:var(--muted);font-size:12px;line-height:1.45;}
 .hero-card[data-mode="game"] .hero-card-dot{background:#dca837;}
 .hero-card[data-mode="game"] .demo-title{color:#785b1e;}
+.hero-card.mode-switching .hero-card-top,
+.hero-card.mode-switching .demo-title,
+.hero-card.mode-switching > .hero-card-row,
+.hero-card.mode-switching > .quiz-options,
+.hero-card.mode-switching > .game-build{animation:demo-content-arrive .28s cubic-bezier(.2,.7,.25,1) both;}
+@keyframes demo-content-arrive{from{opacity:.35;translate:0 7px}to{opacity:1;translate:0 0}}
 
 /* ---------- MAIN ---------- */
 main{width:min(1180px,92%);margin:0 auto;padding:30px 0 90px;}
@@ -810,6 +831,8 @@ textarea{
 .path-heading p{max-width:28ch;color:var(--muted);font-size:13px;text-align:right;}
 .path-steps{display:grid;grid-template-columns:minmax(0,1fr) 24px minmax(0,1fr) 24px minmax(0,1fr);align-items:stretch;gap:10px;}
 .path-step{min-width:0;min-height:190px;padding:17px;border-top:4px solid;border-radius:8px;background:#e7f1ef;}
+.path-step,.feature{transition:transform .26s cubic-bezier(.2,.7,.25,1),box-shadow .26s ease;}
+.path-step:hover,.feature:hover{transform:translateY(-4px);box-shadow:0 12px 24px rgba(22,38,28,.09);}
 .path-step-one{border-color:#398478;background:#e6f1ed;}
 .path-step-two{border-color:#de9845;background:#fbf0dc;}
 .path-step-three{border-color:#6585a6;background:#eaf0f6;}
@@ -834,6 +857,11 @@ textarea{
 .feature-num{margin-bottom:7px;}
 .feature h3{font-size:16px;}
 .feature p{font-size:13px;}
+
+.btn-primary,.nav-signin,.btn-ghost,.subject,.mode,.send,.game-option{transition:transform .18s ease,background-color .18s ease,border-color .18s ease,color .18s ease,box-shadow .18s ease;}
+.btn-primary:hover,.nav-signin:hover,.send:hover{transform:translateY(-2px);}
+.btn-primary:active,.nav-signin:active,.send:active{transform:translateY(0) scale(.985);}
+.subject:hover,.mode:hover,.game-option:hover{transform:translateY(-1px);}
 
 .creator-intro{margin-top:54px;padding-top:22px;border-top:1px solid var(--rule);}
 .creator-intro h2{font-size:22px;font-weight:600;margin-bottom:8px;}
@@ -880,8 +908,7 @@ footer strong{color:#fff;font-weight:600;}
   .hero p{margin-top:13px;font-size:15px;line-height:1.5;}
   .hero-highlights{gap:7px;margin-top:16px;}
   .hero-highlight{padding:7px 9px;font-size:11px;}
-  .hero-card{padding:14px;}
-  .hero-card{transform:none;}
+  .hero-card{padding:14px;transform:none;}
   .hero-card-top{align-items:flex-start;}
   .hero-card-badge{font-size:9px;padding:5px 7px;}
   .demo-title{font-size:19px;margin:0 0 9px;}
@@ -1346,6 +1373,7 @@ if (previewCard) {
   const quizButtons = [...previewCard.querySelectorAll("[data-quiz-choice]")];
   const fractionTiles = [...previewCard.querySelectorAll(".fraction-tile")];
   const gameCheckButton = document.getElementById("checkFractionBuild");
+  let modeAnimationTimer = 0;
 
   function resetGameBuild(){
     fractionTiles.forEach((tile) => {
@@ -1377,6 +1405,13 @@ if (previewCard) {
     });
     resetGameBuild();
     previewTabs.forEach((tab) => tab.setAttribute("aria-pressed", String(tab.dataset.previewMode === mode)));
+    if (!prefersReducedMotion.matches) {
+      previewCard.classList.remove("mode-switching");
+      void previewCard.offsetWidth;
+      previewCard.classList.add("mode-switching");
+      window.clearTimeout(modeAnimationTimer);
+      modeAnimationTimer = window.setTimeout(() => previewCard.classList.remove("mode-switching"), 320);
+    }
   }
 
   previewTabs.forEach((tab) => tab.addEventListener("click", () => setPreviewMode(tab.dataset.previewMode)));
@@ -1420,7 +1455,54 @@ if (previewCard) {
 }
 
 const brandMark = document.querySelector(".logo-mark");
-if (brandMark && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+if (!prefersReducedMotion.matches) {
+  const revealTargets = document.querySelectorAll(".hero-inner > :first-child, .hero-card, .path-heading, .path-step, .feature, .creator-intro");
+  if ("IntersectionObserver" in window) {
+    document.body.classList.add("motion-ready");
+    revealTargets.forEach((element) => element.classList.add("motion-reveal"));
+    const revealObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-visible");
+        observer.unobserve(entry.target);
+      });
+    }, { threshold: 0.14, rootMargin: "0px 0px -32px 0px" });
+    revealTargets.forEach((element) => revealObserver.observe(element));
+
+    const revealVisibleTargets = () => {
+      revealTargets.forEach((element) => {
+        if (element.classList.contains("is-visible")) return;
+        const bounds = element.getBoundingClientRect();
+        if (bounds.top < window.innerHeight - 24 && bounds.bottom > 0) {
+          element.classList.add("is-visible");
+          revealObserver.unobserve(element);
+        }
+      });
+    };
+    revealVisibleTargets();
+    requestAnimationFrame(revealVisibleTargets);
+    window.addEventListener("scroll", revealVisibleTargets, { passive: true });
+    window.addEventListener("resize", revealVisibleTargets, { passive: true });
+  }
+
+  const learningDemo = document.getElementById("learningDemo");
+  if (learningDemo && window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+    learningDemo.addEventListener("pointermove", (event) => {
+      const bounds = learningDemo.getBoundingClientRect();
+      const horizontal = (event.clientX - bounds.left) / bounds.width - 0.5;
+      const vertical = (event.clientY - bounds.top) / bounds.height - 0.5;
+      learningDemo.style.setProperty("--demo-tilt-x", `${(-vertical * 4).toFixed(2)}deg`);
+      learningDemo.style.setProperty("--demo-tilt-y", `${(horizontal * 5).toFixed(2)}deg`);
+    });
+    learningDemo.addEventListener("pointerleave", () => {
+      learningDemo.style.removeProperty("--demo-tilt-x");
+      learningDemo.style.removeProperty("--demo-tilt-y");
+    });
+  }
+}
+
+if (brandMark && !prefersReducedMotion.matches) {
   brandMark.addEventListener("pointermove", (event) => {
     if (event.pointerType !== "mouse") return;
     const bounds = brandMark.getBoundingClientRect();
