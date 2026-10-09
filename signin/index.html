@@ -11,48 +11,77 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../config.js"></script>
 <style>
-:root{--ink:#16261C;--forest:#2F5233;--amber:#D98E3F;--paper:#FAF6EC;--rule:#E4DCC8;--muted:#6B7264;}
+:root{--ink:#16261C;--forest:#2F5233;--forest-soft:#EAF2EA;--amber:#D98E3F;--amber-soft:#FFF1E0;--paper:#FAF6EC;--rule:#E4DCC8;--muted:#6B7264;--error:#A23B2A;}
 *{box-sizing:border-box;margin:0;padding:0;}
-body{min-height:100vh;display:grid;place-items:center;padding:24px;background:linear-gradient(135deg,#FAF6EC 0%,#E9F0E4 100%);color:var(--ink);font-family:'IBM Plex Sans',sans-serif;}
-.auth{width:min(430px,100%);background:#fff;padding:42px;border:1px solid var(--rule);box-shadow:0 18px 50px rgba(22,38,28,.12);}
-.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:20px;margin-bottom:42px;}
-.logo-mark{width:34px;height:34px;display:grid;place-items:center;border-radius:9px;background:var(--amber);font-family:'Source Serif 4',serif;font-size:19px;}
-h1{font:700 38px/1.1 'Source Serif 4',serif;margin-bottom:10px;}
-.intro{color:var(--muted);margin-bottom:28px;}
-label{display:block;font-size:13px;font-weight:600;margin:16px 0 7px;}
-input{width:100%;padding:13px 14px;border:1px solid var(--rule);border-radius:6px;font:inherit;background:#fff;}
-input:focus{outline:2px solid var(--amber);outline-offset:1px;}
-button{width:100%;margin-top:24px;padding:13px;border:0;border-radius:6px;background:var(--forest);color:#fff;font:600 15px 'IBM Plex Sans',sans-serif;cursor:pointer;}
-button:disabled{opacity:.65;cursor:wait;}
-.oauth-divider{display:flex;align-items:center;gap:12px;margin:24px 0 4px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em;}
+html{min-height:100%;background:#111f17;}
+body{min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at 15% 10%, rgba(217,142,63,.18), transparent 30%),radial-gradient(circle at 85% 80%, rgba(62,106,69,.22), transparent 35%),linear-gradient(135deg,#102417 0%,#1a3525 100%);color:var(--ink);font-family:'IBM Plex Sans',sans-serif;}
+.auth-shell{position:relative;width:min(960px,100%);display:grid;grid-template-columns:1fr 1.08fr;overflow:hidden;border-radius:28px;box-shadow:0 32px 90px rgba(0,0,0,.28);background:#fff;border:1px solid rgba(255,255,255,.15);}
+.auth-visual{position:relative;display:flex;flex-direction:column;justify-content:space-between;padding:42px;background:linear-gradient(160deg,#183623 0%,#243f2a 100%);color:#fff;overflow:hidden;}
+.auth-visual::before{content:"";position:absolute;width:320px;height:320px;right:-80px;top:-120px;border:1px solid rgba(255,255,255,.08);border-radius:50%;}
+.auth-visual::after{content:"";position:absolute;width:240px;height:240px;left:-90px;bottom:-110px;border:1px solid rgba(255,255,255,.08);border-radius:50%;}
+.auth-brand{position:relative;z-index:1;display:flex;align-items:center;gap:12px;font-weight:700;font-size:18px;}
+.auth-brand-mark{width:38px;height:38px;display:grid;place-items:center;border-radius:11px;background:var(--amber);color:var(--ink);font-family:'Source Serif 4',serif;font-size:20px;}
+.auth-copy{position:relative;z-index:1;max-width:26rem;}
+.auth-copy .eyebrow{display:inline-block;margin-bottom:16px;padding:7px 10px;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:rgba(255,255,255,.06);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#dfe8df;}
+.auth-copy h1{font:600 clamp(32px,4vw,48px)/1.04 'Source Serif 4',serif;letter-spacing:-.04em;margin-bottom:16px;}
+.auth-copy p{color:#c2d0c2;line-height:1.7;}
+.auth-card{position:relative;z-index:1;padding:42px;background:#fff;display:grid;align-content:center;}
+.auth-card-header{margin-bottom:28px;}
+.auth-card-header h2{font-size:27px;line-height:1.2;font-family:'Source Serif 4',serif;margin-bottom:8px;}
+.auth-card-header p{color:var(--muted);font-size:14px;}
+.form-field{margin-bottom:16px;}
+label{display:block;font-size:13px;font-weight:600;margin:0 0 7px;}
+input{width:100%;padding:13px 14px;border:1px solid var(--rule);border-radius:10px;font:inherit;background:#fff;transition:border-color .15s,box-shadow .15s;}
+input:focus{outline:none;border-color:var(--forest);box-shadow:0 0 0 3px rgba(47,82,51,.1);}
+button{width:100%;margin-top:8px;padding:13px;border:0;border-radius:10px;background:var(--forest);color:#fff;font:600 15px 'IBM Plex Sans',sans-serif;cursor:pointer;box-shadow:0 10px 24px rgba(47,82,51,.18);transition:transform .15s,background .15s,box-shadow .15s;}
+button:hover{background:#3d693d;transform:translateY(-1px);box-shadow:0 12px 28px rgba(47,82,51,.2);}
+button:disabled{opacity:.65;cursor:wait;transform:none;box-shadow:none;}
+.oauth-divider{display:flex;align-items:center;gap:12px;margin:24px 0 12px;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.1em;}
 .oauth-divider::before,.oauth-divider::after{content:"";height:1px;flex:1;background:var(--rule);}
-.oauth-buttons{display:grid;gap:10px;}
-.oauth-button{margin-top:0;background:#fff;color:var(--ink);border:1px solid var(--rule);}
-.oauth-button:hover{border-color:var(--forest);background:#F7FAF5;}
-.switch{margin-top:18px;text-align:center;color:var(--muted);font-size:14px;}
-.switch button{width:auto;margin:0;padding:0;background:none;color:var(--forest);font-size:inherit;text-decoration:underline;}
+.oauth-button{margin-top:0;background:#fff;color:var(--ink);border:1px solid var(--rule);box-shadow:none;}
+.oauth-button:hover{background:#f7faf5;border-color:var(--forest);transform:none;}
+.switch{margin-top:20px;text-align:center;color:var(--muted);font-size:14px;}
+.switch button{width:auto;margin:0;padding:0;background:none;color:var(--forest);font-size:inherit;text-decoration:underline;box-shadow:none;}
+.switch button:hover{background:none;color:#3d693d;transform:none;}
 .message{min-height:22px;margin-top:16px;color:var(--forest);font-size:14px;}
-.message.error{color:#A23B2A;}
+.message.error{color:var(--error);}
+@media(max-width:760px){.auth-shell{grid-template-columns:1fr;}.auth-visual{min-height:220px;padding:28px;}.auth-card{padding:30px 26px 32px;}.auth-card-header h2{font-size:24px;}}
+@media(max-width:420px){body{padding:12px;}.auth-shell{border-radius:20px;}.auth-visual{padding:22px;}.auth-card{padding:24px 18px 26px;}}
 </style>
 </head>
 <body>
-<main class="auth">
-  <div class="logo"><div class="logo-mark">T</div>ThinkTrail.AI</div>
-  <h1 id="title">Welcome back.</h1>
-  <p class="intro" id="intro">Sign in with your email and password.</p>
-  <form id="authForm">
-    <label for="email">Email</label>
-    <input id="email" type="email" autocomplete="email" required>
-    <label for="password">Password</label>
-    <input id="password" type="password" autocomplete="current-password" minlength="6" required>
-    <button id="submitButton" type="submit">Sign in</button>
-  </form>
-  <div class="oauth-divider">or continue with</div>
-  <div class="oauth-buttons">
-    <button class="oauth-button" type="button" data-provider="google">Continue with Google</button>
-  </div>
-  <p class="switch"><span id="switchText">New to ThinkTrail.AI?</span> <button id="switchButton" type="button">Create an account</button></p>
-  <p class="message" id="message" role="status"></p>
+<main class="auth-shell">
+  <section class="auth-visual" aria-label="ThinkTrail.AI introduction">
+    <div class="auth-brand"><span class="auth-brand-mark">T</span>ThinkTrail.AI</div>
+    <div class="auth-copy">
+      <span class="eyebrow">Study smarter</span>
+      <h1>Learn one step at a time.</h1>
+      <p>Guided explanations, practice, quizzes, and study photos help you understand the idea behind each answer.</p>
+    </div>
+  </section>
+  <section class="auth-card" aria-labelledby="title">
+    <div class="auth-card-header">
+      <h2 id="title">Welcome back.</h2>
+      <p id="intro">Sign in with your email and password.</p>
+    </div>
+    <form id="authForm">
+      <div class="form-field">
+        <label for="email">Email</label>
+        <input id="email" type="email" autocomplete="email" required>
+      </div>
+      <div class="form-field">
+        <label for="password">Password</label>
+        <input id="password" type="password" autocomplete="current-password" minlength="6" required>
+      </div>
+      <button id="submitButton" type="submit">Sign in</button>
+    </form>
+    <div class="oauth-divider">or continue with</div>
+    <div class="oauth-buttons">
+      <button class="oauth-button" type="button" data-provider="google">Continue with Google</button>
+    </div>
+    <p class="switch"><span id="switchText">New to ThinkTrail.AI?</span> <button id="switchButton" type="button">Create an account</button></p>
+    <p class="message" id="message" role="status"></p>
+  </section>
 </main>
 <script>
 let isSignUp = false;
