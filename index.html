@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ThinkTrail.AI — Study with a tutor who explains, not just answers</title>
-<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="favicon.svg?v=2">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
@@ -174,6 +174,7 @@ button{cursor:pointer;border:0;background:none;}
 .profile-cancel{border:1px solid var(--rule);}
 .profile-save{background:var(--forest);color:#fff;}
 .profile-status{min-height:18px;margin-top:10px;color:var(--muted);font-size:12px;}
+.profile-save-status{min-height:18px;margin-top:12px;color:var(--muted);font-size:12px;}
 
 .profile-modal{
   position:fixed;
@@ -265,6 +266,37 @@ button{cursor:pointer;border:0;background:none;}
   margin-top:6px;
 }
 .reward-summary strong{color:var(--forest);}
+
+.progress-hud{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:20px 28px;
+  align-items:center;
+  margin-bottom:28px;
+  padding:22px 24px;
+  border-radius:10px;
+  background:linear-gradient(115deg,#183c31 0%,#244f3a 70%,#31583d 100%);
+  color:#fff;
+  box-shadow:0 16px 34px rgba(22,38,28,.15);
+}
+.progress-copy{min-width:0;}
+.progress-kicker{display:block;margin-bottom:7px;color:#e4b76b;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;}
+.progress-copy h2{font-size:25px;line-height:1.15;font-weight:600;}
+.progress-copy h2 span{color:#f3c36e;}
+.progress-copy p{margin-top:6px;color:#c4d7c9;font-size:13px;}
+.progress-metrics{display:flex;align-items:center;gap:0;}
+.progress-metric{min-width:98px;padding:0 18px;border-left:1px solid rgba(255,255,255,.18);}
+.progress-metric:first-child{border-left:0;}
+.progress-metric span{display:block;color:#b9ccbd;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;}
+.progress-metric strong{display:block;margin-top:4px;color:#fff;font-family:'IBM Plex Mono',monospace;font-size:22px;line-height:1.1;}
+.progress-metric small{margin-left:4px;color:#d0ded2;font-family:'IBM Plex Sans',sans-serif;font-size:11px;font-weight:500;}
+.progress-track-wrap{grid-column:1/-1;}
+.progress-track{height:8px;overflow:hidden;border-radius:999px;background:rgba(255,255,255,.16);}
+.progress-track span{display:block;width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,#e9a844,#f5d98a);transition:width .45s ease;}
+.progress-track-meta{display:flex;justify-content:space-between;gap:12px;margin-top:7px;color:#c7d8ca;font-size:11px;}
+.progress-status{grid-column:1/-1;min-height:0;color:#f0d7a5;font-size:12px;}
+.progress-status:empty{display:none;}
+.progress-hud.unavailable .progress-metrics,.progress-hud.unavailable .progress-track-wrap{display:none;}
 
 .modal-actions{
   display:flex;
@@ -459,18 +491,31 @@ button{cursor:pointer;border:0;background:none;}
 .preview-modes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding:4px;background:#eaece3;border-radius:9px;margin-bottom:18px;}
 .preview-mode{min-width:0;padding:9px 4px;border-radius:6px;color:#657064;font-size:12px;font-weight:600;transition:background .18s,color .18s,transform .18s;}
 .preview-mode:hover{color:var(--ink);transform:translateY(-1px);}
-.preview-mode[aria-selected="true"]{background:var(--ink);color:#fff;box-shadow:0 3px 8px rgba(22,38,28,.16);}
+.preview-mode[aria-pressed="true"]{background:var(--ink);color:#fff;box-shadow:0 3px 8px rgba(22,38,28,.16);}
 .hero-card[data-mode="practice"] .hero-tag{background:#dff1f2;color:#25646c;}
 .hero-card[data-mode="quiz"] .hero-tag{background:#fce5d9;color:#9c4f37;}
 .hero-card[data-mode="game"] .hero-tag{background:#f7edc8;color:#785b1e;}
-.preview-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:4px 0 8px;}
-.preview-choices[hidden]{display:none;}
-.preview-choice{padding:9px 8px;border:1px solid var(--rule);border-radius:7px;background:#fff;color:var(--ink);font-size:13px;font-weight:600;transition:background .15s,border-color .15s,transform .15s;}
-.preview-choice:hover{transform:translateY(-2px);border-color:var(--forest);}
-.preview-choice.is-correct{background:#e3f3e7;border-color:#70a981;color:#245638;}
-.preview-choice.is-wrong{background:#fff0e8;border-color:#e5a18b;color:#93462f;}
+.quiz-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:6px 0 8px;}
+.quiz-options[hidden],.game-build[hidden]{display:none;}
+.quiz-option{padding:10px 8px;border:1px solid var(--rule);border-radius:7px;background:#fff;color:var(--ink);font-size:13px;font-weight:600;transition:background .15s,border-color .15s,transform .15s;}
+.quiz-option:hover{transform:translateY(-2px);border-color:var(--forest);}
+.quiz-option.is-correct{background:#e3f3e7;border-color:#70a981;color:#245638;}
+.quiz-option.is-wrong{background:#fff0e8;border-color:#e5a18b;color:#93462f;}
+.game-build{margin:8px 0;}
+.game-round{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:10px;}
+.fraction-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;}
+.fraction-tile{min-height:58px;border:1px solid #d5daca;border-radius:8px;background:#edf2e8;color:var(--ink);font-family:'Source Serif 4',Georgia,serif;font-size:18px;font-weight:600;transition:transform .15s,border-color .15s,background .15s;}
+.fraction-tile:nth-child(2){background:#f9edda;border-color:#ead6b4;}
+.fraction-tile:nth-child(3){background:#e6eef3;border-color:#cbd9e4;}
+.fraction-tile:nth-child(4){background:#f4e9ed;border-color:#e5d0d8;}
+.fraction-tile:hover{transform:translateY(-2px);}
+.fraction-tile[aria-pressed="true"]{outline:2px solid var(--forest);outline-offset:1px;background:#d7e9d8;}
+.fraction-tile:disabled{cursor:default;}
+.game-check{width:100%;margin-top:8px;padding:9px;border-radius:7px;background:var(--ink);color:#fff;font-size:12px;font-weight:600;}
+.game-check:disabled{opacity:.45;cursor:not-allowed;}
 .preview-feedback{min-height:20px;margin:0;color:var(--muted);font-size:12px;line-height:1.45;}
 .hero-card[data-mode="game"] .hero-card-dot{background:#dca837;}
+.hero-card[data-mode="game"] .demo-title{color:#785b1e;}
 
 /* ---------- MAIN ---------- */
 main{width:min(1180px,92%);margin:0 auto;padding:30px 0 90px;}
@@ -673,6 +718,14 @@ textarea{
 
 .game-header{display:flex;justify-content:space-between;align-items:center;}
 .game-header h3{font-size:16px;font-weight:600;}
+.game-topic{display:grid;gap:6px;margin-top:18px;}
+.game-topic label{font-size:12px;font-weight:600;color:#d7e0d5;}
+.game-topic input{width:100%;padding:11px 12px;border:1px solid rgba(255,255,255,.2);border-radius:8px;background:rgba(255,255,255,.07);color:#fff;font:inherit;}
+.game-topic input::placeholder{color:#acb8a9;}
+.game-topic input:focus{outline:2px solid var(--amber);outline-offset:2px;}
+.game-topic-note{color:#b9c4b4;font-size:11px;line-height:1.45;}
+.game-type{display:inline-flex;margin-top:20px;padding:5px 9px;border:1px solid rgba(217,142,63,.42);border-radius:999px;background:rgba(217,142,63,.13);color:#f1c581;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;}
+.game-type[hidden]{display:none;}
 
 .xp{
   background:rgba(217,142,63,.18);
@@ -793,6 +846,9 @@ footer strong{color:#fff;font-weight:600;}
   .features{grid-template-columns:repeat(2,minmax(0,1fr));}
   .feature:last-child{grid-column:1/-1;}
   .tutor-top{flex-direction:column;align-items:flex-start;gap:14px;}
+  .progress-hud{grid-template-columns:1fr;gap:16px;padding:20px;}
+  .progress-metrics{justify-content:flex-start;}
+  .progress-metric:first-child{padding-left:0;}
 }
 
 @media(max-width:560px){
@@ -820,6 +876,13 @@ footer strong{color:#fff;font-weight:600;}
   .hero-cta{display:grid;grid-template-columns:1fr;gap:8px;align-items:stretch;}
   .hero-cta>*{width:100%;text-align:center;}
   .tutor{padding:16px;margin-bottom:32px;}
+  .progress-hud{gap:15px;margin-bottom:22px;padding:18px;}
+  .progress-copy h2{font-size:22px;}
+  .progress-metric{min-width:0;flex:1;padding:0 12px;}
+  .progress-metric strong{font-size:20px;}
+  .progress-track-meta{font-size:10px;}
+  .game-panel{padding:18px;}
+  .game-question{font-size:20px;margin:18px 0;}
   .tutor-title h2{font-size:17px;}
   .mode-buttons{gap:12px;overflow-x:auto;white-space:nowrap;padding-bottom:4px;}
   .mode{padding:6px 2px;}
@@ -915,10 +978,20 @@ footer strong{color:#fff;font-weight:600;}
         <span class="hero-card-avatar">T</span>
         <p id="demoAnswer"><strong>ThinkTrail.AI:</strong> Before adding, what denominator would let you count eighths?</p>
       </div>
-      <div class="preview-choices" id="demoChoices" hidden aria-label="Quick challenge choices">
-        <button class="preview-choice" type="button" data-choice="1/2">1/2</button>
-        <button class="preview-choice" type="button" data-choice="7/8">7/8</button>
-        <button class="preview-choice" type="button" data-choice="1">1</button>
+      <div class="quiz-options" id="demoQuizOptions" hidden role="group" aria-label="Quiz answer choices">
+        <button class="quiz-option" type="button" data-quiz-choice="1/2">1/2</button>
+        <button class="quiz-option" type="button" data-quiz-choice="7/8">7/8</button>
+        <button class="quiz-option" type="button" data-quiz-choice="1">1</button>
+      </div>
+      <div class="game-build" id="demoGameBuild" hidden>
+        <div class="game-round"><span>FRACTION BUILD</span><span id="gameTileCount">0 / 2 tiles</span></div>
+        <div class="fraction-tiles" role="group" aria-label="Choose two fractions that add up to seven eighths">
+          <button class="fraction-tile" type="button" aria-pressed="false" data-eighths="6">3/4</button>
+          <button class="fraction-tile" type="button" aria-pressed="false" data-eighths="1">1/8</button>
+          <button class="fraction-tile" type="button" aria-pressed="false" data-eighths="4">1/2</button>
+          <button class="fraction-tile" type="button" aria-pressed="false" data-eighths="2">1/4</button>
+        </div>
+        <button class="game-check" id="checkFractionBuild" type="button" disabled>Check your build</button>
       </div>
       <p class="preview-feedback" id="demoFeedback" aria-live="polite"></p>
       <div class="hero-card-footer"><span id="demoFooterOne">Ask for a hint</span><span id="demoFooterTwo">Go step by step</span></div>
@@ -927,6 +1000,24 @@ footer strong{color:#fff;font-weight:600;}
 </section>
 
 <main>
+
+<section class="progress-hud app-only" id="progressHud" hidden aria-labelledby="progressTitle">
+  <div class="progress-copy">
+    <span class="progress-kicker">YOUR LEARNING TRAIL</span>
+    <h2 id="progressTitle">Welcome back, <span id="progressStudentName">student</span>.</h2>
+    <p id="progressMessage">Every good question moves you forward.</p>
+  </div>
+  <div class="progress-metrics" aria-label="Your learning progress">
+    <div class="progress-metric"><span>Streak</span><strong><span id="progressStreak">0</span><small>days</small></strong></div>
+    <div class="progress-metric"><span>Level</span><strong id="progressLevel">1</strong></div>
+    <div class="progress-metric"><span>Total XP</span><strong id="progressXp">120</strong></div>
+  </div>
+  <div class="progress-track-wrap">
+    <div class="progress-track" id="progressTrack" role="progressbar" aria-label="XP progress to next level" aria-valuemin="0" aria-valuemax="250" aria-valuenow="120"><span id="progressFill"></span></div>
+    <div class="progress-track-meta"><span id="progressLevelMeta">130 XP to level 2</span><span id="dailyXpMeta">0 XP today</span></div>
+  </div>
+  <p class="progress-status" id="progressStatus" role="status" aria-live="polite"></p>
+</section>
 
 <div class="section-title app-only" hidden>What are you studying</div>
 
@@ -1008,10 +1099,16 @@ footer strong{color:#fff;font-weight:600;}
 
   <div class="game-panel" id="gamePanel">
     <div class="game-header">
-      <h3 id="gameTitle">Study challenge</h3>
+      <h3 id="gameTitle">Make a study challenge</h3>
       <div class="xp" id="xpCounter">120 XP</div>
     </div>
-    <p class="game-question" id="gameQuestion">Generate a fresh challenge for the selected subject.</p>
+    <div class="game-topic">
+      <label for="gameTopicInput">What are you studying?</label>
+      <input id="gameTopicInput" type="text" maxlength="180" placeholder="Try cell division, linear equations, or the water cycle" autocomplete="off">
+      <p class="game-topic-note">The AI uses your topic and selected subject to make a fresh question. It needs a topic so it knows what you want to practise.</p>
+    </div>
+    <span class="game-type" id="gameTypeLabel" hidden></span>
+    <p class="game-question" id="gameQuestion">Add a topic or question above to get started.</p>
     <div class="game-options" id="gameOptions"></div>
     <p class="game-feedback" id="gameFeedback" aria-live="polite"></p>
     <button class="game-generate" id="generateGameButton" type="button" onclick="generateStudyGame()">Generate challenge</button>
@@ -1127,6 +1224,7 @@ footer strong{color:#fff;font-weight:600;}
         </div>
       </div>
 
+      <p class="profile-save-status" id="profileSaveStatus" role="status" aria-live="polite"></p>
       <div class="modal-actions">
         <button type="button" class="secondary" onclick="closeProfileModal()">Cancel</button>
         <button type="submit" class="primary">Save</button>
@@ -1177,6 +1275,8 @@ const profileState = {
   rewardGoal: "Unlock a mastery badge",
   streak: 0
 };
+const studyChallengeFormats = ["multiple_choice", "true_false", "finish_the_step", "spot_the_mistake"];
+let lastStudyChallengeFormat = "";
 
 const previewModes = {
   learn: {
@@ -1207,26 +1307,39 @@ const previewModes = {
     answer: "ThinkTrail.AI: Pick one. I’ll explain why, whichever you choose.",
     firstTip: "Check your thinking",
     secondTip: "Learn from a miss",
-    interactive: true
+    activity: "quiz"
   },
   game: {
     tag: "Math · Brain break",
-    badge: "A quick brain break",
-    title: "Ready for a mini challenge?",
-    question: "A recipe needs 3/4 cup, then another 1/8. How much altogether?",
-    answer: "ThinkTrail.AI: Choose your answer to reveal the explanation.",
-    firstTip: "One quick round",
-    secondTip: "Practice can be fun",
-    interactive: true
+    badge: "Build it with fraction tiles",
+    title: "Make seven eighths.",
+    question: "Pick two tiles that add up to 7/8.",
+    answer: "ThinkTrail.AI: Combine the tiles, then check your build.",
+    firstTip: "Choose two tiles",
+    secondTip: "Build, then check",
+    activity: "game"
   }
 };
 
 const previewCard = document.getElementById("learningDemo");
 if (previewCard) {
   const previewTabs = [...previewCard.querySelectorAll("[data-preview-mode]")];
-  const previewChoices = document.getElementById("demoChoices");
+  const quizOptions = document.getElementById("demoQuizOptions");
+  const gameBuild = document.getElementById("demoGameBuild");
   const previewFeedback = document.getElementById("demoFeedback");
-  const choiceButtons = [...previewCard.querySelectorAll("[data-choice]")];
+  const quizButtons = [...previewCard.querySelectorAll("[data-quiz-choice]")];
+  const fractionTiles = [...previewCard.querySelectorAll(".fraction-tile")];
+  const gameCheckButton = document.getElementById("checkFractionBuild");
+
+  function resetGameBuild(){
+    fractionTiles.forEach((tile) => {
+      tile.setAttribute("aria-pressed", "false");
+      tile.disabled = false;
+    });
+    gameCheckButton.textContent = "Check your build";
+    gameCheckButton.disabled = true;
+    document.getElementById("gameTileCount").textContent = "0 / 2 tiles";
+  }
 
   function setPreviewMode(mode){
     const preview = previewModes[mode];
@@ -1239,27 +1352,55 @@ if (previewCard) {
     document.getElementById("demoAnswer").textContent = preview.answer;
     document.getElementById("demoFooterOne").textContent = preview.firstTip;
     document.getElementById("demoFooterTwo").textContent = preview.secondTip;
-    previewChoices.hidden = !preview.interactive;
+    quizOptions.hidden = preview.activity !== "quiz";
+    gameBuild.hidden = preview.activity !== "game";
     previewFeedback.textContent = "";
-    choiceButtons.forEach((button) => {
+    quizButtons.forEach((button) => {
       button.classList.remove("is-correct", "is-wrong");
       button.disabled = false;
     });
+    resetGameBuild();
     previewTabs.forEach((tab) => tab.setAttribute("aria-pressed", String(tab.dataset.previewMode === mode)));
   }
 
   previewTabs.forEach((tab) => tab.addEventListener("click", () => setPreviewMode(tab.dataset.previewMode)));
-  choiceButtons.forEach((button) => button.addEventListener("click", () => {
-    const isCorrect = button.dataset.choice === "7/8";
-    choiceButtons.forEach((choice) => {
+  quizButtons.forEach((button) => button.addEventListener("click", () => {
+    const isCorrect = button.dataset.quizChoice === "7/8";
+    quizButtons.forEach((choice) => {
       choice.disabled = true;
-      if (choice.dataset.choice === "7/8") choice.classList.add("is-correct");
+      if (choice.dataset.quizChoice === "7/8") choice.classList.add("is-correct");
     });
     if (!isCorrect) button.classList.add("is-wrong");
     previewFeedback.textContent = isCorrect
       ? "Exactly. Three quarters is six eighths, and 6/8 + 1/8 = 7/8."
       : "Good try. Rewrite 3/4 as 6/8, then add the eighths: 6/8 + 1/8 = 7/8.";
   }));
+
+  fractionTiles.forEach((tile) => tile.addEventListener("click", () => {
+    const selectedTiles = fractionTiles.filter((item) => item.getAttribute("aria-pressed") === "true");
+    if (tile.getAttribute("aria-pressed") === "true") {
+      tile.setAttribute("aria-pressed", "false");
+    } else if (selectedTiles.length < 2) {
+      tile.setAttribute("aria-pressed", "true");
+    }
+    const selectedCount = fractionTiles.filter((item) => item.getAttribute("aria-pressed") === "true").length;
+    document.getElementById("gameTileCount").textContent = `${selectedCount} / 2 tiles`;
+    gameCheckButton.disabled = selectedCount !== 2;
+    previewFeedback.textContent = "";
+  }));
+
+  gameCheckButton.addEventListener("click", () => {
+    const totalEighths = fractionTiles
+      .filter((tile) => tile.getAttribute("aria-pressed") === "true")
+      .reduce((total, tile) => total + Number(tile.dataset.eighths), 0);
+    const isCorrect = totalEighths === 7;
+    previewFeedback.textContent = isCorrect
+      ? "Nice build! 3/4 is 6/8, and 6/8 + 1/8 makes 7/8."
+      : "Not quite. Try combining 3/4 and 1/8: change 3/4 into eighths first.";
+    fractionTiles.forEach((tile) => { tile.disabled = true; });
+    gameCheckButton.textContent = isCorrect ? "Build complete" : "Round complete";
+    gameCheckButton.disabled = true;
+  });
 }
 
 const brandMark = document.querySelector(".logo-mark");
@@ -1301,36 +1442,12 @@ async function ensureProfileRecord(user){
   const fallbackName = getDisplayNameFallback(user.email);
   const { data: profile, error } = await supabaseClient
     .from("profiles")
-    .select("id, name, email, streak, xp")
+    .select("id, name, email, streak, xp, last_active_on, xp_earned_on, xp_earned_today, bio, focus_areas, study_materials, reward_goal")
     .eq("id", user.id)
     .maybeSingle();
 
-  if (error && error.code !== "PGRST116") {
-    console.warn("Profile lookup warning:", error);
-  }
-
-  if (!profile) {
-    const insertPayload = {
-      id: user.id,
-      name: fallbackName,
-      email: user.email,
-      streak: 0,
-      xp: 120
-    };
-
-    const { data: createdProfile, error: insertError } = await supabaseClient
-      .from("profiles")
-      .insert(insertPayload)
-      .select("id, name, email, streak, xp")
-      .single();
-
-    if (insertError) {
-      console.warn("Profile insert warning:", insertError);
-      return { id: user.id, name: fallbackName, email: user.email, streak: 0, xp: 120 };
-    }
-
-    return createdProfile;
-  }
+  if (error) throw new Error(`Your progress profile could not be loaded: ${error.message}`);
+  if (!profile) throw new Error(`Your student profile is missing. Sign out and back in to recreate it for ${fallbackName}.`);
 
   return profile;
 }
@@ -1339,10 +1456,54 @@ function refreshRewardSummary(){
   const summaryText = document.getElementById("rewardSummaryText");
   const summaryMeta = document.getElementById("rewardSummaryMeta");
   const nextGoal = profileState.rewardGoal || "Unlock a mastery badge";
-  const xpNeeded = Math.max(0, 250 - xp);
+  const xpNeeded = 250 - (xp % 250);
 
   if (summaryText) summaryText.textContent = nextGoal;
-  if (summaryMeta) summaryMeta.textContent = xp + " XP earned • " + (xpNeeded ? xpNeeded + " XP to next reward" : "Reward unlocked");
+  if (summaryMeta) summaryMeta.textContent = xp + " XP earned • " + xpNeeded + " XP to next level";
+}
+
+function renderProgressHud(dailyXp = 0){
+  const displayName = profileState.name.trim() || "Student";
+  const level = Math.floor(xp / 250) + 1;
+  const levelXp = xp % 250;
+  const levelProgress = Math.round(levelXp / 250 * 100);
+  const streakValue = document.getElementById("progressStreak");
+
+  document.getElementById("progressStudentName").textContent = displayName.split(/\s+/)[0];
+  if (streakValue) streakValue.textContent = String(profileState.streak);
+  document.getElementById("progressLevel").textContent = String(level);
+  document.getElementById("progressXp").textContent = String(xp);
+  document.getElementById("progressFill").style.width = `${levelProgress}%`;
+  document.getElementById("progressTrack").setAttribute("aria-valuenow", String(levelXp));
+  document.getElementById("progressLevelMeta").textContent = `${250 - levelXp} XP to level ${level + 1}`;
+  document.getElementById("dailyXpMeta").textContent = `${Math.max(0, dailyXp)} XP today`;
+  document.getElementById("streakBadge").textContent = `${profileState.streak} day streak`;
+  document.getElementById("xpCounter").textContent = `${xp} XP`;
+  document.getElementById("progressHud").classList.remove("unavailable");
+  refreshRewardSummary();
+}
+
+async function recordStudyActivity(points = 0){
+  if (!currentUser) throw new Error("Sign in to save XP and streak progress.");
+  const { data, error } = await supabaseClient.rpc("record_study_activity", { p_xp: points });
+  if (error) throw new Error(error.message || "Your study progress could not be saved.");
+  if (!data || !Number.isFinite(Number(data.xp)) || !Number.isFinite(Number(data.streak))) {
+    throw new Error("The progress service returned an invalid result.");
+  }
+
+  xp = Number(data.xp);
+  profileState.streak = Number(data.streak);
+  const dailyXp = Number(data.xp_earned_today) || 0;
+  renderProgressHud(dailyXp);
+  const status = document.getElementById("progressStatus");
+  if (Number(data.awarded_xp) > 0) {
+    status.textContent = `+${data.awarded_xp} XP saved. ${dailyXp} XP earned today.`;
+  } else if (points > 0) {
+    status.textContent = "Your study day was saved, but no XP was returned for this activity.";
+  } else {
+    status.textContent = "Study day saved to your streak.";
+  }
+  return data;
 }
 
 function renderProfileFormFromState(){
@@ -1381,17 +1542,15 @@ async function hydrateProfileFromDb(profile){
   const fallbackName = getDisplayNameFallback(currentUser?.email || profile?.email || "Student");
 
   profileState.name = profile?.name || stored.name || fallbackName;
-  profileState.bio = stored.bio || "";
-  profileState.focusAreas = Array.isArray(stored.focusAreas) && stored.focusAreas.length ? stored.focusAreas : ["Math", "Science"];
-  profileState.studyMaterials = stored.studyMaterials || "";
-  profileState.rewardGoal = stored.rewardGoal || "Unlock a mastery badge";
+  profileState.bio = profile?.bio || stored.bio || "";
+  profileState.focusAreas = Array.isArray(profile?.focus_areas) && profile.focus_areas.length
+    ? profile.focus_areas
+    : Array.isArray(stored.focusAreas) && stored.focusAreas.length ? stored.focusAreas : ["Math", "Science"];
+  profileState.studyMaterials = profile?.study_materials || stored.studyMaterials || "";
+  profileState.rewardGoal = profile?.reward_goal || stored.rewardGoal || "Unlock a mastery badge";
   profileState.streak = Number(profile?.streak ?? stored.streak ?? 0);
 
-  if (profile?.xp != null) {
-    xp = Number(profile.xp);
-  } else if (stored.xp != null) {
-    xp = Number(stored.xp);
-  }
+  xp = Number(profile?.xp ?? stored.xp ?? 120);
 
   currentProfileName = profileState.name.trim() || fallbackName;
   const initial = currentProfileName.charAt(0).toUpperCase();
@@ -1407,16 +1566,19 @@ async function hydrateProfileFromDb(profile){
   if (xpCounter) xpCounter.textContent = xp + " XP";
   if (document.getElementById("profileNameInput")) document.getElementById("profileNameInput").value = currentProfileName;
 
-  refreshRewardSummary();
+  const today = new Date().toISOString().slice(0, 10);
+  const dailyXp = profile?.xp_earned_on === today ? Number(profile.xp_earned_today) || 0 : 0;
+  renderProgressHud(dailyXp);
 }
 
 (async function initAuth(){
   const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
 
-  if(sessionError || !session){
+  if(sessionError){
     console.error("Could not load the current session:", sessionError);
     return;
   }
+  if(!session) return;
 
   currentUser = session.user;
   document.querySelectorAll(".app-only").forEach(element => { element.hidden = false; });
@@ -1429,17 +1591,15 @@ async function hydrateProfileFromDb(profile){
     console.error("Profile hydration failed:", error);
     const fallbackName = getDisplayNameFallback(currentUser.email);
     profileState.name = fallbackName;
-    profileState.streak = 0;
-    xp = 120;
     currentProfileName = fallbackName;
     const avatarBtn = document.getElementById("avatarBtn");
     const avatarEmail = document.getElementById("avatarEmail");
-    const streakBadge = document.getElementById("streakBadge");
     const xpCounter = document.getElementById("xpCounter");
     if (avatarBtn) avatarBtn.textContent = fallbackName.charAt(0).toUpperCase();
     if (avatarEmail) avatarEmail.textContent = currentUser.email;
-    if (streakBadge) streakBadge.textContent = "0 day streak";
-    if (xpCounter) xpCounter.textContent = "120 XP";
+    if (xpCounter) xpCounter.textContent = "Progress unavailable";
+    document.getElementById("progressHud").classList.add("unavailable");
+    document.getElementById("progressStatus").textContent = "We couldn't load your saved progress. Your activity will not be credited until your profile reconnects.";
   }
 })();
 
@@ -1463,42 +1623,61 @@ document.querySelectorAll(".focus-chip").forEach((chip) => {
 
 document.getElementById("profileForm").addEventListener("submit", async function(event){
   event.preventDefault();
-
-  const selectedFocus = Array.from(document.querySelectorAll(".focus-chip.selected")).map((button) => button.dataset.subject);
-
-  profileState.name = document.getElementById("displayNameInput").value.trim() || getDisplayNameFallback(currentUser?.email || "Student");
-  profileState.bio = document.getElementById("bioInput").value.trim();
-  profileState.focusAreas = selectedFocus.length ? selectedFocus : ["Math"];
-  profileState.studyMaterials = document.getElementById("studyMaterialsInput").value.trim();
-  profileState.rewardGoal = document.getElementById("rewardGoalInput").value.trim() || "Unlock a mastery badge";
-
-  const stored = readStoredProfileSettings();
-  const nextSettings = {
-    ...stored,
-    name: profileState.name,
-    bio: profileState.bio,
-    focusAreas: profileState.focusAreas,
-    studyMaterials: profileState.studyMaterials,
-    rewardGoal: profileState.rewardGoal,
-    xp,
-    streak: profileState.streak
-  };
-  saveStoredProfileSettings(nextSettings);
-
-  currentProfileName = profileState.name;
-  document.getElementById("avatarBtn").textContent = profileState.name.charAt(0).toUpperCase();
-  document.getElementById("streakBadge").textContent = profileState.streak + " day streak";
-  refreshRewardSummary();
-
-  if (currentUser) {
-    await supabaseClient.from("profiles").update({
-      name: profileState.name,
-      xp,
-      streak: profileState.streak
-    }).eq("id", currentUser.id);
+  const form = event.currentTarget;
+  const saveButton = form.querySelector('button[type="submit"]');
+  const saveStatus = document.getElementById("profileSaveStatus");
+  if (!currentUser) {
+    saveStatus.textContent = "Sign in to save profile settings.";
+    return;
   }
+  const selectedFocus = Array.from(document.querySelectorAll(".focus-chip.selected")).map((button) => button.dataset.subject);
+  const nextProfile = {
+    name: document.getElementById("displayNameInput").value.trim() || getDisplayNameFallback(currentUser.email || "Student"),
+    bio: document.getElementById("bioInput").value.trim(),
+    focus_areas: selectedFocus.length ? selectedFocus : ["Math"],
+    study_materials: document.getElementById("studyMaterialsInput").value.trim(),
+    reward_goal: document.getElementById("rewardGoalInput").value.trim() || "Unlock a mastery badge"
+  };
+  saveButton.disabled = true;
+  saveStatus.textContent = "Saving settings…";
+  try {
+    const { data, error } = await supabaseClient
+      .from("profiles")
+      .update({ ...nextProfile, updated_at: new Date().toISOString() })
+      .eq("id", currentUser.id)
+      .select("id")
+      .maybeSingle();
+    if (error) throw error;
+    if (!data) throw new Error("No profile was updated. Refresh and sign in again.");
 
-  closeProfileModal();
+    profileState.name = nextProfile.name;
+    profileState.bio = nextProfile.bio;
+    profileState.focusAreas = nextProfile.focus_areas;
+    profileState.studyMaterials = nextProfile.study_materials;
+    profileState.rewardGoal = nextProfile.reward_goal;
+    currentProfileName = profileState.name;
+    document.getElementById("avatarBtn").textContent = profileState.name.charAt(0).toUpperCase();
+    renderProgressHud(Number(document.getElementById("dailyXpMeta").textContent.match(/^\d+/)?.[0]) || 0);
+    try {
+      saveStoredProfileSettings({
+        ...readStoredProfileSettings(),
+        name: profileState.name,
+        bio: profileState.bio,
+        focusAreas: profileState.focusAreas,
+        studyMaterials: profileState.studyMaterials,
+        rewardGoal: profileState.rewardGoal
+      });
+    } catch (storageError) {
+      console.warn("Profile settings saved to the account, but not browser storage:", storageError);
+    }
+    saveStatus.textContent = "Settings saved to your account.";
+    closeProfileModal();
+  } catch (error) {
+    console.error("Profile settings save failed:", error);
+    saveStatus.textContent = `Could not save settings: ${error.message || "Please try again."}`;
+  } finally {
+    saveButton.disabled = false;
+  }
 });
 
 async function signOut(){
@@ -1531,10 +1710,10 @@ async function saveProfileSettings(){
 
   button.disabled = true;
   status.textContent = "Saving…";
-  const { error } = await supabaseClient.from("profiles").update({ name }).eq("id", currentUser.id);
+  const { data, error } = await supabaseClient.from("profiles").update({ name, updated_at: new Date().toISOString() }).eq("id", currentUser.id).select("id").maybeSingle();
   button.disabled = false;
-  if(error){
-    status.textContent = "Could not save your profile. Please try again.";
+  if(error || !data){
+    status.textContent = error?.message || "No profile was updated. Refresh and sign in again.";
     return;
   }
 
@@ -1544,6 +1723,7 @@ async function saveProfileSettings(){
   if (avatarBtn) avatarBtn.textContent = name.charAt(0).toUpperCase();
   const avatarEmail = document.getElementById("avatarEmail");
   if (avatarEmail) avatarEmail.textContent = currentUser.email;
+  document.getElementById("progressStudentName").textContent = name.split(/\s+/)[0];
   document.getElementById("profileDialog").close();
 }
 
@@ -1818,6 +1998,12 @@ async function sendMessage(){
     { role: "assistant", content: data.answer }
   );
   if(conversationHistory.length > 10) conversationHistory.splice(0, conversationHistory.length - 10);
+  try {
+    await recordStudyActivity(5);
+  } catch (progressError) {
+    document.getElementById("progressStatus").textContent = `Your tutor response arrived, but progress could not be saved: ${progressError.message}`;
+    console.error("Tutor progress save failed:", progressError);
+  }
   addMessage(data.answer, "ai", "", data.sources);
 }
 
@@ -1892,33 +2078,63 @@ async function gameAnswer(button){
   const isCorrect = selectedIndex === currentGame.answerIndex;
   document.querySelectorAll(".game-option").forEach(option => { option.disabled = true; });
   const feedback = document.getElementById("gameFeedback");
+  let progressResult = null;
+  let progressError = null;
+  try {
+    progressResult = await recordStudyActivity(isCorrect ? 25 : 0);
+  } catch (error) {
+    progressError = error;
+    document.getElementById("progressStatus").textContent = `Progress could not be saved: ${error.message}`;
+    console.error("Game progress save failed:", error);
+  }
+
   if(isCorrect){
-    xp += 25;
-    document.getElementById("xpCounter").textContent = xp + " XP";
-    refreshRewardSummary();
-    feedback.textContent = `Correct! +25 XP. ${currentGame.explanation}`;
-    if(currentUser) await supabaseClient.from("profiles").update({ xp }).eq("id", currentUser.id);
+    const rewardText = progressResult?.awarded_xp > 0
+      ? `+${progressResult.awarded_xp} XP saved.`
+      : progressError ? "Your answer is correct, but the reward could not be saved." : "Challenge complete. Your streak counts for today.";
+    feedback.textContent = `Correct! ${rewardText} ${currentGame.explanation}`;
   } else {
-    feedback.textContent = `Not quite. ${currentGame.explanation}`;
+    feedback.textContent = `Not quite. ${currentGame.explanation}${progressError ? " Your streak could not be synced." : ""}`;
   }
 }
 
 async function generateStudyGame(){
   const button = document.getElementById("generateGameButton");
+  const topicInput = document.getElementById("gameTopicInput");
   const question = document.getElementById("gameQuestion");
   const options = document.getElementById("gameOptions");
   const feedback = document.getElementById("gameFeedback");
+  const topic = topicInput.value.trim();
+  if(!topic){
+    feedback.textContent = "Add a topic or paste a study question first. For example: “the water cycle” or “solve 2x + 5 = 13”.";
+    topicInput.focus();
+    return;
+  }
+
+  const availableFormats = studyChallengeFormats.filter((format) => format !== lastStudyChallengeFormat);
+  const challengeType = availableFormats[Math.floor(Math.random() * availableFormats.length)];
   button.disabled = true;
   button.textContent = "Creating challenge…";
-  question.textContent = `Creating a ${currentSubject} challenge…`;
+  question.textContent = `Making a ${currentSubject} challenge about ${topic}…`;
+  document.getElementById("gameTypeLabel").hidden = true;
   options.replaceChildren();
   feedback.textContent = "";
   try{
     const { data, error } = await supabaseClient.functions.invoke("tutor", {
-      body: { generateGame: true, subject: currentSubject }
+      body: { generateGame: true, subject: currentSubject, question: topic, challengeType }
     });
     if(error || !data?.game) throw new Error(data?.error || error?.message || "Could not create a challenge.");
     currentGame = data.game;
+    lastStudyChallengeFormat = challengeType;
+    const formatLabels = {
+      multiple_choice: "Multiple choice",
+      true_false: "True or false",
+      finish_the_step: "Finish the step",
+      spot_the_mistake: "Spot the mistake"
+    };
+    const typeLabel = document.getElementById("gameTypeLabel");
+    typeLabel.textContent = formatLabels[currentGame.challengeType] || "Study challenge";
+    typeLabel.hidden = false;
     question.textContent = currentGame.question;
     currentGame.options.forEach((optionText, index) => {
       const option = document.createElement("button");
@@ -1938,6 +2154,13 @@ async function generateStudyGame(){
     button.textContent = "Generate another challenge";
   }
 }
+
+document.getElementById("gameTopicInput").addEventListener("keydown", (event) => {
+  if(event.key === "Enter"){
+    event.preventDefault();
+    generateStudyGame();
+  }
+});
 
 </script>
 

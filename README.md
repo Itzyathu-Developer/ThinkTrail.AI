@@ -9,16 +9,16 @@ Many students need more than a final answer. They need structure, guided support
 - step-by-step tutoring with hints before revealing answers
 - subject-based learning paths
 - practice and quiz modes for reinforcement
-- a playful Fraction Quest mini-game to keep momentum going
-- progress tracking with XP, profile stats, and account-based learning history
+- varied AI-generated study challenges with topic-aware questions
+- daily study streaks, level progress, and account-based XP rewards
 
 ## Features
 
 - Guided study flow with hints and explanations
 - Subject selection for focused learning sessions
 - Practice mode and quiz mode
-- Fraction Quest game for quick engagement
-- XP and profile progress tracking
+- AI-generated challenges across school subjects and question formats
+- Account-backed XP, levels, daily streaks, and repeatable rewards for study activity
 - Email/password sign-up with email verification
 - Google, Apple, and Microsoft sign-in via Supabase
 - Privacy and terms pages for a complete app experience
@@ -34,6 +34,9 @@ Many students need more than a final answer. They need structure, guided support
 ├── signin/
 │   └── index.html             # Sign-in and account creation flow
 ├── supabase/
+│   ├── migrations/
+│   │   ├── 20261009_profile_progress.sql # Profiles, RLS, streaks, and XP RPC
+│   │   └── 20261010_unlimited_xp_rewards.sql # Repeatable XP rewards
 │   └── functions/
 │       └── tutor/
 │           └── index.ts       # Secure Groq-powered tutor function
@@ -65,7 +68,7 @@ Before deployment:
 1. Create or select a Supabase project.
 2. Enable the authentication providers you want to support.
 3. Add your local and production URLs under Supabase Authentication → URL Configuration.
-4. Create the profiles table and set up row-level security rules for authenticated users.
+4. Apply the profile and progress schema with `supabase db push`. It creates a profile for every existing account, adds a signup trigger for new accounts, and restricts profile rows to their owner.
 5. Make sure your email verification settings match the sign-up flow in signin/index.html.
 
 Keep the anonymous key in the browser only, and never expose a service-role secret in frontend code.
