@@ -49,7 +49,7 @@ button{cursor:pointer;border:0;background:none;}
 :focus:not(:focus-visible){outline:none;}
 
 @media (prefers-reduced-motion: reduce){
-  *{animation-duration:.001ms !important; transition-duration:.001ms !important;}
+  *,*::before,*::after{animation-duration:.001ms !important; transition-duration:.001ms !important;}
 }
 
 /* ---------- NAV ---------- */
@@ -66,16 +66,42 @@ button{cursor:pointer;border:0;background:none;}
   z-index:30;
 }
 
-.logo{display:flex;align-items:center;gap:10px;font-weight:600;font-size:19px;letter-spacing:-.2px;}
+.logo{display:flex;align-items:center;gap:12px;color:inherit;text-decoration:none;font-weight:600;font-size:19px;}
 
 .logo-mark{
-  width:34px;height:34px;border-radius:9px;
+  position:relative;
+  width:38px;height:38px;flex:0 0 38px;border-radius:11px;
   background:var(--amber);
   display:grid;place-items:center;
   color:var(--ink);
   font-family:'Source Serif 4',serif;
   font-weight:700;
-  font-size:18px;
+  font-size:19px;
+  animation:logo-drift 3.6s ease-in-out infinite;
+}
+.logo-mark::after{
+  content:"";
+  position:absolute;
+  inset:-5px 2px;
+  border:1px solid rgba(217,142,63,.55);
+  border-radius:13px;
+  transform:rotate(-28deg);
+  animation:logo-orbit 12s linear infinite;
+  pointer-events:none;
+}
+@keyframes logo-orbit{
+  to{transform:rotate(332deg)}
+}
+.logo-mark span{
+  display:grid;
+  place-items:center;
+  width:100%;height:100%;
+  transform:translate(var(--cursor-x,0px),var(--cursor-y,0px)) rotate(var(--cursor-rotate,0deg));
+  transition:transform .16s ease-out;
+}
+@keyframes logo-drift{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-3px)}
 }
 
 .nav-right{display:flex;align-items:center;gap:14px;}
@@ -266,7 +292,7 @@ button{cursor:pointer;border:0;background:none;}
   position:relative;
   overflow:hidden;
   color:#fff;
-  padding:72px 6% 94px;
+  padding:clamp(52px,6vw,80px) 6% clamp(58px,7vw,88px);
   background:
     radial-gradient(circle at 70% 14%, rgba(217,142,63,.18), transparent 30%),
     radial-gradient(circle at 90% 80%, rgba(62,106,69,.46), transparent 35%),
@@ -292,7 +318,7 @@ button{cursor:pointer;border:0;background:none;}
   margin:0 auto;
   display:grid;
   grid-template-columns:1.08fr .92fr;
-  gap:56px;
+  gap:clamp(36px,6vw,88px);
   align-items:center;
 }
 
@@ -317,11 +343,11 @@ button{cursor:pointer;border:0;background:none;}
 }
 
 .hero h1{
-  font-size:clamp(34px,4.6vw,54px);
+  font-size:clamp(38px,5vw,66px);
   line-height:1.08;
   font-weight:600;
-  letter-spacing:-.5px;
-  max-width:12ch;
+  letter-spacing:0;
+  max-width:15ch;
 }
 
 .hero h1 u{
@@ -367,33 +393,34 @@ button{cursor:pointer;border:0;background:none;}
 }
 .btn-ghost:hover{border-color:#fff;}
 
-/* hero preview card */
-.hero-stat-row{
+/* hero mode sampler */
+.hero-highlights{
   display:flex;
   flex-wrap:wrap;
-  gap:14px;
-  margin-top:30px;
+  gap:9px;
+  margin-top:28px;
 }
 
-.hero-stat{
-  display:grid;
-  gap:2px;
-  min-width:92px;
-  padding:10px 12px;
+.hero-highlight{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  padding:7px 11px;
   background:rgba(255,255,255,.06);
   border:1px solid rgba(255,255,255,.1);
-  border-radius:10px;
+  border-radius:999px;
+  color:#e7eee5;
+  font-size:12px;
+  font-weight:500;
 }
-
-.hero-stat strong{font-size:18px;}
-.hero-stat span{color:#bfd0bf;font-size:11px;letter-spacing:.04em;text-transform:uppercase;}
+.hero-highlight span{color:var(--amber);font-size:15px;}
 
 .hero-card{
   position:relative;
   background:linear-gradient(145deg, #fff 0%, #faf4e8 100%);
   border:1px solid rgba(47,82,51,.12);
-  border-radius:18px;
-  padding:22px;
+  border-radius:16px;
+  padding:24px;
   color:var(--text);
   box-shadow:0 30px 60px rgba(0,0,0,.35);
   transform:rotate(1.2deg);
@@ -405,23 +432,48 @@ button{cursor:pointer;border:0;background:none;}
   inset:10px 12px auto auto;
   width:84px;height:84px;border-radius:50%;
   background:radial-gradient(circle, rgba(217,142,63,.16), transparent 68%);
+  transform-origin:top right;
+  animation:demo-spark 4s ease-in-out infinite;
 }
+@keyframes demo-spark{50%{transform:scale(1.22);opacity:.65}}
 
 .hero-card-top{display:flex;justify-content:space-between;align-items:center;gap:12px;}
-.hero-card-badge{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--forest);background:#edf5ed;border-radius:999px;padding:5px 8px;font-weight:700;}
+.demo-kicker{display:block;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px;}
+.hero-card-badge{font-size:10px;letter-spacing:.04em;color:var(--forest);background:#e3f3e7;border-radius:999px;padding:6px 9px;font-weight:700;white-space:nowrap;}
 .hero-card-line{height:1px;background:linear-gradient(90deg, var(--rule), transparent);margin:14px 0;}
 .hero-card-row{display:flex;gap:10px;align-items:flex-start;margin-bottom:12px;position:relative;z-index:1;}
 .hero-card-row.assistant{align-items:center;}
 .hero-card-dot{width:9px;height:9px;border-radius:50%;background:var(--amber);box-shadow:0 0 0 5px rgba(217,142,63,.12);margin-top:5px;flex:none;}
+.hero-card-dot{animation:study-pulse 2.4s ease-in-out infinite;}
+@keyframes study-pulse{
+  0%,100%{box-shadow:0 0 0 4px rgba(217,142,63,.1)}
+  50%{box-shadow:0 0 0 8px rgba(217,142,63,.18)}
+}
 .hero-card-avatar{width:26px;height:26px;border-radius:50%;background:var(--forest);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700;flex:none;}
-.hero-tag{font-size:11px;font-weight:700;color:var(--forest);background:#EAF1EA;border-radius:6px;padding:5px 8px;display:inline-block;}
+.hero-tag{font-size:11px;font-weight:700;color:var(--forest);background:#EAF1EA;border-radius:6px;padding:6px 9px;display:inline-block;white-space:nowrap;}
 .hero-card p{color:var(--text);font-size:14px;line-height:1.6;max-width:none;margin:0;}
 .hero-card strong{color:var(--forest);}
 .hero-card-footer{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;position:relative;z-index:1;}
 .hero-card-footer span{font-size:10px;color:var(--muted);background:#f3efe8;border:1px solid var(--rule);border-radius:999px;padding:5px 9px;}
+.demo-title{margin:2px 0 14px;font-family:'Source Serif 4',Georgia,serif;font-size:22px;line-height:1.2;color:var(--ink);}
+.preview-modes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding:4px;background:#eaece3;border-radius:9px;margin-bottom:18px;}
+.preview-mode{min-width:0;padding:9px 4px;border-radius:6px;color:#657064;font-size:12px;font-weight:600;transition:background .18s,color .18s,transform .18s;}
+.preview-mode:hover{color:var(--ink);transform:translateY(-1px);}
+.preview-mode[aria-selected="true"]{background:var(--ink);color:#fff;box-shadow:0 3px 8px rgba(22,38,28,.16);}
+.hero-card[data-mode="practice"] .hero-tag{background:#dff1f2;color:#25646c;}
+.hero-card[data-mode="quiz"] .hero-tag{background:#fce5d9;color:#9c4f37;}
+.hero-card[data-mode="game"] .hero-tag{background:#f7edc8;color:#785b1e;}
+.preview-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:4px 0 8px;}
+.preview-choices[hidden]{display:none;}
+.preview-choice{padding:9px 8px;border:1px solid var(--rule);border-radius:7px;background:#fff;color:var(--ink);font-size:13px;font-weight:600;transition:background .15s,border-color .15s,transform .15s;}
+.preview-choice:hover{transform:translateY(-2px);border-color:var(--forest);}
+.preview-choice.is-correct{background:#e3f3e7;border-color:#70a981;color:#245638;}
+.preview-choice.is-wrong{background:#fff0e8;border-color:#e5a18b;color:#93462f;}
+.preview-feedback{min-height:20px;margin:0;color:var(--muted);font-size:12px;line-height:1.45;}
+.hero-card[data-mode="game"] .hero-card-dot{background:#dca837;}
 
 /* ---------- MAIN ---------- */
-main{width:min(1180px,92%);margin:0 auto;padding:56px 0 90px;}
+main{width:min(1180px,92%);margin:0 auto;padding:30px 0 90px;}
 
 .section-title{
   font-size:14px;
@@ -682,6 +734,38 @@ textarea{
 .feature h3{font-size:16px;font-weight:600;margin-bottom:8px;}
 .feature p{color:var(--muted);font-size:13.8px;line-height:1.6;}
 
+.learning-path{margin:0 0 48px;padding:22px 0 0;border-top:1px solid var(--rule);}
+.path-heading{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;column-gap:24px;margin-bottom:22px;}
+.path-label{grid-column:1/-1;margin-bottom:8px;color:var(--amber-dark);font-family:'IBM Plex Mono',monospace;font-size:11px;}
+.path-heading h2{color:var(--ink);font-size:clamp(25px,3vw,34px);line-height:1.15;font-weight:600;}
+.path-heading p{max-width:28ch;color:var(--muted);font-size:13px;text-align:right;}
+.path-steps{display:grid;grid-template-columns:minmax(0,1fr) 24px minmax(0,1fr) 24px minmax(0,1fr);align-items:stretch;gap:10px;}
+.path-step{min-width:0;min-height:190px;padding:17px;border-top:4px solid;border-radius:8px;background:#e7f1ef;}
+.path-step-one{border-color:#398478;background:#e6f1ed;}
+.path-step-two{border-color:#de9845;background:#fbf0dc;}
+.path-step-three{border-color:#6585a6;background:#eaf0f6;}
+.path-icon{display:grid;place-items:center;width:36px;height:36px;margin-bottom:15px;border-radius:50%;background:#fff;color:#286c62;font-size:20px;font-weight:600;}
+.path-step-two .path-icon{color:#a46a1f;}
+.path-step-three .path-icon{color:#486e94;}
+.path-count{display:block;margin-bottom:6px;color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.03em;}
+.path-step h3{margin-bottom:6px;color:var(--ink);font-size:15px;font-weight:600;}
+.path-step p{color:#55645b;font-size:12px;line-height:1.5;}
+.path-connector{align-self:center;color:#9c9d88;font-size:20px;text-align:center;}
+
+.features{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;border:0;}
+.feature{min-width:0;padding:18px;border:0;border-top:4px solid;border-radius:8px;background:#e8f1ed;}
+.feature:nth-child(1){border-color:#398478;background:#e6f1ed;}
+.feature:nth-child(2){border-color:#df9b45;background:#fbf0dc;}
+.feature:nth-child(3){border-color:#6686a6;background:#eaf0f6;}
+.feature:last-child{border-right:0;}
+.feature:not(:first-child){padding-left:18px;}
+.feature-mark{display:grid;place-items:center;width:34px;height:34px;margin-bottom:15px;border-radius:50%;background:#fff;color:#286c62;font-size:18px;}
+.feature:nth-child(2) .feature-mark{color:#a46a1f;}
+.feature:nth-child(3) .feature-mark{color:#486e94;}
+.feature-num{margin-bottom:7px;}
+.feature h3{font-size:16px;}
+.feature p{font-size:13px;}
+
 .creator-intro{margin-top:54px;padding-top:22px;border-top:1px solid var(--rule);}
 .creator-intro h2{font-size:22px;font-weight:600;margin-bottom:8px;}
 .creator-intro p{max-width:64ch;color:var(--muted);font-size:14px;line-height:1.7;}
@@ -703,25 +787,36 @@ footer strong{color:#fff;font-weight:600;}
 @media(max-width:900px){
   .hero-inner{grid-template-columns:1fr;}
   .hero-card{transform:none;order:0;}
-  .features{grid-template-columns:1fr;}
-  .feature{border-right:0;border-bottom:1px solid var(--rule);padding:22px 0;}
-  .feature:not(:first-child){padding-left:0;}
+  .path-steps{grid-template-columns:1fr;gap:8px;}
+  .path-step{min-height:0;}
+  .path-connector{transform:rotate(90deg);line-height:1;}
+  .features{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .feature:last-child{grid-column:1/-1;}
   .tutor-top{flex-direction:column;align-items:flex-start;gap:14px;}
 }
 
 @media(max-width:560px){
   .nav{padding:0 4%;height:64px;}
   .streak{display:none;}
-  .logo{font-size:17px;}
-  main{width:94%;}
-  .hero{padding:42px 5% 56px;}
-  .hero-inner{gap:30px;}
+  .logo{font-size:16px;gap:10px;}
+  .logo-mark{width:34px;height:34px;flex-basis:34px;}
+  main{width:94%;padding-top:8px;}
+  .hero{padding:28px 5% 14px;}
+  .hero-inner{gap:20px;}
   .hero h1{max-width:none;}
-  .hero-stat-row{gap:8px;}
-  .hero-stat{flex:1;min-width:0;}
-  .hero-card{padding:18px;}
+  .eyebrow{margin-bottom:14px;}
+  .hero p{margin-top:13px;font-size:15px;line-height:1.5;}
+  .hero-highlights{gap:7px;margin-top:16px;}
+  .hero-highlight{padding:7px 9px;font-size:11px;}
+  .hero-card{padding:14px;}
+  .hero-card{transform:none;}
   .hero-card-top{align-items:flex-start;}
-  .hero-card-badge{display:none;}
+  .hero-card-badge{font-size:9px;padding:5px 7px;}
+  .demo-title{font-size:19px;margin:0 0 9px;}
+  .hero-card-line,.hero-card-row.assistant,.hero-card-footer{display:none;}
+  .preview-modes{margin-bottom:12px;}
+  .hero-cta{margin-top:18px;}
+  .preview-mode{font-size:11px;}
   .hero-cta{display:grid;grid-template-columns:1fr;gap:8px;align-items:stretch;}
   .hero-cta>*{width:100%;text-align:center;}
   .tutor{padding:16px;margin-bottom:32px;}
@@ -732,18 +827,6 @@ footer strong{color:#fff;font-weight:600;}
   .profile-dialog{padding:20px;}
   .profile-dialog-actions button{flex:1;}
   footer{flex-direction:column;text-align:left;}
-  .section-title::after{display:none;}
-}
-
-@media(max-width:560px){
-  .nav{padding:0 4%;}
-  .streak{display:none;}
-  main{width:94%;}
-  .hero{padding:44px 5% 60px;}
-  .hero-inner{gap:28px;}
-  .hero-cta{display:grid;grid-template-columns:1fr;gap:8px;align-items:stretch;}
-  .hero-cta>*{width:100%;text-align:center;}
-  .tutor{padding:16px;margin-bottom:32px;}
   .chat{min-height:170px;max-height:320px;}
   .message.ai .bubble{width:100%;max-width:100%;}
   .input-bottom{display:grid;grid-template-columns:1fr;gap:10px;align-items:stretch;}
@@ -759,6 +842,14 @@ footer strong{color:#fff;font-weight:600;}
   .profile-dialog{padding:20px;}
   .profile-dialog-actions button{flex:1;}
   footer{flex-direction:column;text-align:left;}
+  .section-title::after{display:none;}
+  .path-heading{grid-template-columns:1fr;gap:8px;}
+  .path-label{grid-column:auto;}
+  .path-heading p{text-align:left;}
+  .path-steps{gap:6px;}
+  .path-step{padding:15px;}
+  .features{grid-template-columns:1fr;gap:9px;}
+  .feature:last-child{grid-column:auto;}
 }
 </style>
 </head>
@@ -766,10 +857,10 @@ footer strong{color:#fff;font-weight:600;}
 <body>
 
 <nav class="nav">
-  <div class="logo">
-    <div class="logo-mark">T</div>
+  <a class="logo" href="index.html" aria-label="ThinkTrail.AI home">
+    <div class="logo-mark" aria-hidden="true"><span>T</span></div>
     ThinkTrail.AI
-  </div>
+  </a>
   <div class="nav-right">
     <a class="nav-signin public-only" id="navSignin" href="signin/index.html">Sign in</a>
     <div class="streak app-only" id="streakBadge" hidden>— day streak</div>
@@ -787,40 +878,50 @@ footer strong{color:#fff;font-weight:600;}
 <section class="hero">
   <div class="hero-inner">
     <div>
-      <div class="eyebrow">In development · Beta version</div>
-      <h1>Turn every lesson into a <u>clearer trail</u> of understanding.</h1>
-      <p>ThinkTrail.AI helps students learn with guided explanations, homework support, practice questions, quick games, and photo-based study help — without skipping the thinking.</p>
-      <div class="hero-stat-row" aria-label="Platform highlights">
-        <div class="hero-stat"><strong>6+</strong><span>subjects</span></div>
-        <div class="hero-stat"><strong>4</strong><span>learning modes</span></div>
-        <div class="hero-stat"><strong>1:1</strong><span>guided support</span></div>
+      <div class="eyebrow">A little help goes a long way</div>
+      <h1>Make the hard stuff <u>make sense.</u></h1>
+      <p>Bring the homework, the messy notes, the “wait, what?” moment. Get a patient guide, a useful hint, and a chance to figure it out yourself.</p>
+      <div class="hero-highlights" aria-label="Ways to study">
+        <div class="hero-highlight"><span aria-hidden="true">✳</span> Your pace</div>
+        <div class="hero-highlight"><span aria-hidden="true">↗</span> Hints first</div>
+        <div class="hero-highlight"><span aria-hidden="true">◎</span> Any subject</div>
       </div>
       <div class="hero-cta">
-        <a class="btn-primary public-only" href="signin/index.html">Sign in to start learning</a>
+        <a class="btn-primary public-only" href="signin/index.html">Let’s figure it out</a>
         <button class="btn-primary app-only" id="startSessionBtn" hidden onclick="document.getElementById('tutor').scrollIntoView()">Start a session</button>
-        <button class="btn-ghost" onclick="document.getElementById('features').scrollIntoView()">See how it works</button>
+        <button class="btn-ghost" onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})">Take a quick look</button>
       </div>
     </div>
 
-    <div class="hero-card" aria-label="Tutor example conversation">
-      <div class="hero-card-top">
-        <span class="hero-tag">Math · Learn mode</span>
-        <span class="hero-card-badge">Live guidance</span>
+    <div class="hero-card" id="learningDemo" data-mode="learn" aria-label="Try a ThinkTrail.AI learning mode">
+      <span class="demo-kicker">Pick a way to learn</span>
+      <div class="preview-modes" role="group" aria-label="Learning mode preview">
+        <button class="preview-mode" type="button" aria-pressed="true" data-preview-mode="learn">Learn</button>
+        <button class="preview-mode" type="button" aria-pressed="false" data-preview-mode="practice">Practice</button>
+        <button class="preview-mode" type="button" aria-pressed="false" data-preview-mode="quiz">Quiz</button>
+        <button class="preview-mode" type="button" aria-pressed="false" data-preview-mode="game">Game</button>
       </div>
+      <div class="hero-card-top">
+        <span class="hero-tag" id="demoTag">Math · Learn</span>
+        <span class="hero-card-badge" id="demoBadge">A hint, not a spoiler</span>
+      </div>
+      <h2 class="demo-title" id="demoTitle">Let's make this click.</h2>
       <div class="hero-card-row">
         <span class="hero-card-dot"></span>
-        <p>What's the derivative of x³ + 2x?</p>
+        <p id="demoQuestion">Why does 3/4 + 1/8 equal 7/8?</p>
       </div>
       <div class="hero-card-line"></div>
       <div class="hero-card-row assistant">
         <span class="hero-card-avatar">T</span>
-        <p><strong>ThinkTrail.AI:</strong> Before I show you the answer, which rule handles a power like x³?</p>
+        <p id="demoAnswer"><strong>ThinkTrail.AI:</strong> Before adding, what denominator would let you count eighths?</p>
       </div>
-      <div class="hero-card-footer">
-        <span>Step-by-step</span>
-        <span>Ask a hint</span>
-        <span>Photo support</span>
+      <div class="preview-choices" id="demoChoices" hidden aria-label="Quick challenge choices">
+        <button class="preview-choice" type="button" data-choice="1/2">1/2</button>
+        <button class="preview-choice" type="button" data-choice="7/8">7/8</button>
+        <button class="preview-choice" type="button" data-choice="1">1</button>
       </div>
+      <p class="preview-feedback" id="demoFeedback" aria-live="polite"></p>
+      <div class="hero-card-footer"><span id="demoFooterOne">Ask for a hint</span><span id="demoFooterTwo">Go step by step</span></div>
     </div>
   </div>
 </section>
@@ -918,23 +1019,54 @@ footer strong{color:#fff;font-weight:600;}
 
 </section>
 
-<div class="section-title" id="features">How ThinkTrail.AI supports learning</div>
+<section class="learning-path" id="features" aria-label="A better way through a tough question">
+  <div class="path-heading">
+    <span class="path-label">THE THINKTRAIL WAY</span>
+    <h2>From stuck to “got it.”</h2>
+    <p>No answer-dumping. Just the next useful step.</p>
+  </div>
+  <div class="path-steps">
+    <article class="path-step path-step-one">
+      <span class="path-icon" aria-hidden="true">⌕</span>
+      <span class="path-count">01 / START HERE</span>
+      <h3>Bring the confusing bit</h3>
+      <p>Type a question or snap a photo of the page you’re working on.</p>
+    </article>
+    <span class="path-connector" aria-hidden="true">→</span>
+    <article class="path-step path-step-two">
+      <span class="path-icon" aria-hidden="true">✳</span>
+      <span class="path-count">02 / MAKE SENSE</span>
+      <h3>Get a nudge, not a shortcut</h3>
+      <p>Clear explanations and small hints help you stay in the driver’s seat.</p>
+    </article>
+    <span class="path-connector" aria-hidden="true">→</span>
+    <article class="path-step path-step-three">
+      <span class="path-icon" aria-hidden="true">↗</span>
+      <span class="path-count">03 / YOUR TURN</span>
+      <h3>Try it for yourself</h3>
+      <p>Practice, quiz, or play it back until the idea sticks.</p>
+    </article>
+  </div>
+</section>
 
 <section class="features">
   <div class="feature">
+    <span class="feature-mark" aria-hidden="true">↗</span>
     <span class="feature-num">01</span>
-    <h3>Guides, doesn't hand over answers</h3>
-    <p>Explanations, hints, and worked examples build understanding instead of just filling in a blank.</p>
+    <h3>Small hints. Big “aha.”</h3>
+    <p>Work through the idea with explanations and examples, without someone doing the thinking for you.</p>
   </div>
   <div class="feature">
+    <span class="feature-mark" aria-hidden="true">✳</span>
     <span class="feature-num">02</span>
-    <h3>Games when you want them</h3>
-    <p>Turn a topic into a quick quest, quiz, or practice round — entirely optional, never required.</p>
+    <h3>Make practice less of a chore</h3>
+    <p>Turn a tricky topic into a quick quiz or challenge when a change of pace sounds good.</p>
   </div>
   <div class="feature">
+    <span class="feature-mark" aria-hidden="true">◎</span>
     <span class="feature-num">03</span>
-    <h3>Built for students</h3>
-    <p>Stays focused on safe, age-appropriate homework help instead of open-ended chat.</p>
+    <h3>Made for real school days</h3>
+    <p>Get help with homework, notes, and study photos, across the subjects you’re learning now.</p>
   </div>
 </section>
 
@@ -1045,6 +1177,108 @@ const profileState = {
   rewardGoal: "Unlock a mastery badge",
   streak: 0
 };
+
+const previewModes = {
+  learn: {
+    tag: "Math · Learn",
+    badge: "A hint, not a spoiler",
+    title: "Let's make this click.",
+    question: "Why does 3/4 + 1/8 equal 7/8?",
+    answer: "ThinkTrail.AI: Before adding, what denominator would let you count eighths?",
+    firstTip: "Ask for a hint",
+    secondTip: "Go step by step",
+    interactive: false
+  },
+  practice: {
+    tag: "Math · Practice",
+    badge: "Your turn to try",
+    title: "Try one with me.",
+    question: "What is 2/3 + 1/6?",
+    answer: "ThinkTrail.AI: Think about changing thirds into sixths first. What would 2/3 become?",
+    firstTip: "A similar question",
+    secondTip: "Build confidence",
+    interactive: false
+  },
+  quiz: {
+    tag: "Math · Quick quiz",
+    badge: "No pressure",
+    title: "Quick check: your call.",
+    question: "What is 3/4 + 1/8?",
+    answer: "ThinkTrail.AI: Pick one. I’ll explain why, whichever you choose.",
+    firstTip: "Check your thinking",
+    secondTip: "Learn from a miss",
+    interactive: true
+  },
+  game: {
+    tag: "Math · Brain break",
+    badge: "A quick brain break",
+    title: "Ready for a mini challenge?",
+    question: "A recipe needs 3/4 cup, then another 1/8. How much altogether?",
+    answer: "ThinkTrail.AI: Choose your answer to reveal the explanation.",
+    firstTip: "One quick round",
+    secondTip: "Practice can be fun",
+    interactive: true
+  }
+};
+
+const previewCard = document.getElementById("learningDemo");
+if (previewCard) {
+  const previewTabs = [...previewCard.querySelectorAll("[data-preview-mode]")];
+  const previewChoices = document.getElementById("demoChoices");
+  const previewFeedback = document.getElementById("demoFeedback");
+  const choiceButtons = [...previewCard.querySelectorAll("[data-choice]")];
+
+  function setPreviewMode(mode){
+    const preview = previewModes[mode];
+    if (!preview) return;
+    previewCard.dataset.mode = mode;
+    document.getElementById("demoTag").textContent = preview.tag;
+    document.getElementById("demoBadge").textContent = preview.badge;
+    document.getElementById("demoTitle").textContent = preview.title;
+    document.getElementById("demoQuestion").textContent = preview.question;
+    document.getElementById("demoAnswer").textContent = preview.answer;
+    document.getElementById("demoFooterOne").textContent = preview.firstTip;
+    document.getElementById("demoFooterTwo").textContent = preview.secondTip;
+    previewChoices.hidden = !preview.interactive;
+    previewFeedback.textContent = "";
+    choiceButtons.forEach((button) => {
+      button.classList.remove("is-correct", "is-wrong");
+      button.disabled = false;
+    });
+    previewTabs.forEach((tab) => tab.setAttribute("aria-pressed", String(tab.dataset.previewMode === mode)));
+  }
+
+  previewTabs.forEach((tab) => tab.addEventListener("click", () => setPreviewMode(tab.dataset.previewMode)));
+  choiceButtons.forEach((button) => button.addEventListener("click", () => {
+    const isCorrect = button.dataset.choice === "7/8";
+    choiceButtons.forEach((choice) => {
+      choice.disabled = true;
+      if (choice.dataset.choice === "7/8") choice.classList.add("is-correct");
+    });
+    if (!isCorrect) button.classList.add("is-wrong");
+    previewFeedback.textContent = isCorrect
+      ? "Exactly. Three quarters is six eighths, and 6/8 + 1/8 = 7/8."
+      : "Good try. Rewrite 3/4 as 6/8, then add the eighths: 6/8 + 1/8 = 7/8.";
+  }));
+}
+
+const brandMark = document.querySelector(".logo-mark");
+if (brandMark && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  brandMark.addEventListener("pointermove", (event) => {
+    if (event.pointerType !== "mouse") return;
+    const bounds = brandMark.getBoundingClientRect();
+    const x = (event.clientX - bounds.left - bounds.width / 2) / bounds.width;
+    const y = (event.clientY - bounds.top - bounds.height / 2) / bounds.height;
+    brandMark.style.setProperty("--cursor-x", `${(x * 8).toFixed(1)}px`);
+    brandMark.style.setProperty("--cursor-y", `${(y * 8).toFixed(1)}px`);
+    brandMark.style.setProperty("--cursor-rotate", `${(x * 18).toFixed(1)}deg`);
+  });
+  brandMark.addEventListener("pointerleave", () => {
+    brandMark.style.removeProperty("--cursor-x");
+    brandMark.style.removeProperty("--cursor-y");
+    brandMark.style.removeProperty("--cursor-rotate");
+  });
+}
 
 function readStoredProfileSettings(){
   try {
