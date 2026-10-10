@@ -1,4 +1,5 @@
 # ThinkTrail.AI
+### Made by Yatharth Ganesh Bochare(itzyathu_12), 14 Year old Vibe-Coder... Trying to connect with the world with *Mind-blowing & Useful Projects.*
 
 ThinkTrail.AI is a friendly study companion built to help students learn with understanding instead of just getting quick answers. It combines guided tutoring, practice sessions, quizzes, and a lightweight game so learning feels active, encouraging, and motivating.
 
