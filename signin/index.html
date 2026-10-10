@@ -14,9 +14,15 @@
 :root{--ink:#16261C;--forest:#2F5233;--forest-soft:#EAF2EA;--amber:#D98E3F;--amber-soft:#FFF1E0;--paper:#FAF6EC;--rule:#E4DCC8;--muted:#6B7264;--error:#A23B2A;}
 *{box-sizing:border-box;margin:0;padding:0;}
 html{min-height:100%;background:#111f17;}
-body{min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at 15% 10%, rgba(217,142,63,.18), transparent 30%),radial-gradient(circle at 85% 80%, rgba(62,106,69,.22), transparent 35%),linear-gradient(135deg,#102417 0%,#1a3525 100%);color:var(--ink);font-family:'IBM Plex Sans',sans-serif;}
-.auth-shell{position:relative;width:min(960px,100%);display:grid;grid-template-columns:1fr 1.08fr;overflow:hidden;border-radius:28px;box-shadow:0 32px 90px rgba(0,0,0,.28);background:#fff;border:1px solid rgba(255,255,255,.15);}
+body{min-height:100vh;display:grid;place-items:center;padding:24px;background:#2f3135;color:var(--ink);font-family:'IBM Plex Sans',sans-serif;}
+@keyframes fadeUp{0%{opacity:0;transform:translateY(16px) scale(.985);}100%{opacity:1;transform:translateY(0) scale(1);}}
+@keyframes floatIn{0%{opacity:0;transform:translateY(10px);}100%{opacity:1;transform:translateY(0);}}
+.auth-shell{position:relative;width:min(960px,100%);display:grid;grid-template-columns:1fr 1.08fr;overflow:hidden;border-radius:28px;box-shadow:0 32px 90px rgba(0,0,0,.28);background:#fff;border:1px solid rgba(255,255,255,.15);animation:fadeUp .45s cubic-bezier(.2,.8,.2,1);transition:transform .25s ease, box-shadow .25s ease, width .25s ease;}
+.auth-shell:hover{transform:translateY(-2px);box-shadow:0 36px 110px rgba(0,0,0,.34);}
+.auth-shell.verification-ui{width:min(470px,100%);grid-template-columns:1fr;min-height:unset;background:#f5f5f1;border-radius:18px;box-shadow:none;border:0;}
 .auth-visual{position:relative;display:flex;flex-direction:column;justify-content:space-between;padding:42px;background:linear-gradient(160deg,#183623 0%,#243f2a 100%);color:#fff;overflow:hidden;}
+.auth-shell.verification-ui .auth-visual{display:none;}
+.auth-shell.verification-ui .auth-card{padding:32px 28px 24px;background:#f5f5f1;border-radius:18px;}
 .auth-visual::before{content:"";position:absolute;width:320px;height:320px;right:-80px;top:-120px;border:1px solid rgba(255,255,255,.08);border-radius:50%;}
 .auth-visual::after{content:"";position:absolute;width:240px;height:240px;left:-90px;bottom:-110px;border:1px solid rgba(255,255,255,.08);border-radius:50%;}
 .auth-brand{position:relative;z-index:1;display:flex;align-items:center;gap:12px;font-weight:700;font-size:18px;}
@@ -25,15 +31,19 @@ body{min-height:100vh;display:grid;place-items:center;padding:24px;background:ra
 .auth-copy .eyebrow{display:inline-block;margin-bottom:16px;padding:7px 10px;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:rgba(255,255,255,.06);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#dfe8df;}
 .auth-copy h1{font:600 clamp(32px,4vw,48px)/1.04 'Source Serif 4',serif;letter-spacing:-.04em;margin-bottom:16px;}
 .auth-copy p{color:#c2d0c2;line-height:1.7;}
-.auth-card{position:relative;z-index:1;padding:42px;background:#fff;display:grid;align-content:center;}
-.auth-card-header{margin-bottom:28px;}
+.auth-card{position:relative;z-index:1;padding:42px;background:#fff;display:grid;align-content:center;animation:floatIn .38s ease both;transition:padding .25s ease, background .25s ease;}
+.auth-card-header{margin-bottom:28px;transition:margin-bottom .25s ease;}
 .auth-card-header h2{font-size:27px;line-height:1.2;font-family:'Source Serif 4',serif;margin-bottom:8px;}
 .auth-card-header p{color:var(--muted);font-size:14px;}
+.auth-shell.verification-ui .auth-card-header{margin-bottom:18px;}
+.auth-shell.verification-ui .auth-card-header h2{font-size:30px;line-height:1.18;margin-bottom:8px;font-family:'IBM Plex Sans',sans-serif;font-weight:700;letter-spacing:-.02em;}
+.auth-shell.verification-ui .auth-card-header p{font-size:16px;color:#4b4b4b;line-height:1.5;}
 .form-field{margin-bottom:16px;}
 label{display:block;font-size:13px;font-weight:600;margin:0 0 7px;}
-input{width:100%;padding:13px 14px;border:1px solid var(--rule);border-radius:10px;font:inherit;background:#fff;transition:border-color .15s,box-shadow .15s;}
-input:focus{outline:none;border-color:var(--forest);box-shadow:0 0 0 3px rgba(47,82,51,.1);}
-button{width:100%;margin-top:8px;padding:13px;border:0;border-radius:10px;background:var(--forest);color:#fff;font:600 15px 'IBM Plex Sans',sans-serif;cursor:pointer;box-shadow:0 10px 24px rgba(47,82,51,.18);transition:transform .15s,background .15s,box-shadow .15s;}
+input{width:100%;padding:13px 14px;border:1px solid var(--rule);border-radius:10px;font:inherit;background:#fff;transition:border-color .18s ease, box-shadow .18s ease, transform .18s ease, background .18s ease;}
+input:hover{border-color:#c9d1c2;}
+input:focus{outline:none;border-color:var(--forest);box-shadow:0 0 0 3px rgba(47,82,51,.1);transform:translateY(-1px);}
+button{width:100%;margin-top:8px;padding:13px;border:0;border-radius:10px;background:var(--forest);color:#fff;font:600 15px 'IBM Plex Sans',sans-serif;cursor:pointer;box-shadow:0 10px 24px rgba(47,82,51,.18);transition:transform .18s ease, background .18s ease, box-shadow .18s ease, opacity .18s ease;}
 button:hover{background:#3d693d;transform:translateY(-1px);box-shadow:0 12px 28px rgba(47,82,51,.2);}
 button:disabled{opacity:.65;cursor:wait;transform:none;box-shadow:none;}
 .oauth-divider{display:flex;align-items:center;gap:12px;margin:24px 0 12px;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.1em;}
@@ -43,10 +53,32 @@ button:disabled{opacity:.65;cursor:wait;transform:none;box-shadow:none;}
 .switch{margin-top:20px;text-align:center;color:var(--muted);font-size:14px;}
 .switch button{width:auto;margin:0;padding:0;background:none;color:var(--forest);font-size:inherit;text-decoration:underline;box-shadow:none;}
 .switch button:hover{background:none;color:#3d693d;transform:none;}
-.message{min-height:22px;margin-top:16px;color:var(--forest);font-size:14px;}
+.verification-hint{margin:0 0 18px;color:#1f1f1f;font-size:15px;line-height:1.5;animation:floatIn .3s ease;}
+.verification-hint strong{display:block;margin-top:4px;font-weight:700;word-break:break-all;}
+.code-field-wrap{display:flex;flex-direction:column;gap:18px;align-items:stretch;animation:floatIn .28s ease;}
+.digit-row{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;margin-bottom:8px;}
+.digit-box{width:100%;height:46px;padding:0;text-align:center;border:1px solid #d8d5cf;border-radius:10px;font-size:24px;font-weight:600;background:#fff;color:#1a1a1a;transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease;}
+.digit-box:hover{transform:translateY(-1px);}
+.digit-box:focus{border-color:var(--forest);box-shadow:0 0 0 3px rgba(47,82,51,.12);transform:translateY(-1px);}
+.numeric-keypad{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 14px;margin-top:4px;}
+.numeric-key{height:52px;border:none;border-radius:10px;background:#f1efe8;color:#1a1a1a;font-size:22px;font-weight:600;cursor:pointer;box-shadow:none;margin:0;padding:0;transition:transform .15s ease, background .15s ease, box-shadow .15s ease;}
+.numeric-key:hover{background:#e8e4dc;transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.06);}
+.numeric-key:active{transform:translateY(0) scale(.98);}
+.numeric-key.backspace{font-size:20px;}
+#submitButton{background:linear-gradient(90deg,#5e4fd7,#4f46d1);box-shadow:none;border-radius:14px;height:52px;transition:transform .18s ease, box-shadow .18s ease, filter .18s ease;}
+#submitButton:hover{background:linear-gradient(90deg,#5548cf,#453cc7);box-shadow:0 12px 24px rgba(94,79,215,.28);}
+#submitButton:hover{background:linear-gradient(90deg,#5548cf,#453cc7);}
+.auth-shell.verification-ui .oauth-divider,
+.auth-shell.verification-ui .oauth-button,
+.auth-shell.verification-ui .switch,
+.auth-shell.verification-ui #otpToggle,
+.auth-shell.verification-ui #switchButton,
+.auth-shell.verification-ui #switchText,
+.auth-shell.verification-ui .switch button{display:none !important;}
+.message{min-height:22px;margin-top:16px;color:var(--forest);font-size:14px;transition:opacity .18s ease, transform .18s ease;}
 .message.error{color:var(--error);}
-@media(max-width:760px){.auth-shell{grid-template-columns:1fr;}.auth-visual{min-height:220px;padding:28px;}.auth-card{padding:30px 26px 32px;}.auth-card-header h2{font-size:24px;}}
-@media(max-width:420px){body{padding:12px;}.auth-shell{border-radius:20px;}.auth-visual{padding:22px;}.auth-card{padding:24px 18px 26px;}}
+@media(max-width:760px){.auth-shell{grid-template-columns:1fr;}.auth-visual{min-height:220px;padding:28px;}.auth-card{padding:30px 26px 32px;}.auth-card-header h2{font-size:24px;}.digit-box{height:42px;font-size:22px;}.numeric-key{height:44px;font-size:20px;}}
+@media(max-width:420px){body{padding:12px;}.auth-shell{border-radius:20px;}.auth-visual{padding:22px;}.auth-card{padding:24px 18px 26px;}.digit-row{gap:8px;}.numeric-keypad{gap:10px 8px;}}
 </style>
 </head>
 <body>
@@ -65,7 +97,7 @@ button:disabled{opacity:.65;cursor:wait;transform:none;box-shadow:none;}
       <p id="intro">Sign in with your email and password.</p>
     </div>
     <form id="authForm">
-      <div class="form-field">
+      <div class="form-field" id="emailField">
         <label for="email">Email</label>
         <input id="email" type="email" autocomplete="email" required>
       </div>
@@ -73,9 +105,20 @@ button:disabled{opacity:.65;cursor:wait;transform:none;box-shadow:none;}
         <label for="password">Password</label>
         <input id="password" type="password" autocomplete="current-password" minlength="6" required>
       </div>
-      <div class="form-field" id="codeField" hidden>
-        <label for="verificationCode">6-digit code</label>
-        <input id="verificationCode" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*" placeholder="123456">
+      <div class="verification-hint" id="verificationHint" hidden>
+        Enter the 6-digit verification code sent to<br>
+        <strong id="verificationEmail"></strong>
+      </div>
+      <div class="code-field-wrap" id="codeField" hidden>
+        <div class="digit-row" aria-label="Enter the 6-digit code">
+          <input class="digit-box" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 1">
+          <input class="digit-box" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 2">
+          <input class="digit-box" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 3">
+          <input class="digit-box" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 4">
+          <input class="digit-box" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 5">
+          <input class="digit-box" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 6">
+        </div>
+        <input id="verificationCode" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*" hidden>
       </div>
       <button id="submitButton" type="submit">Sign in</button>
     </form>
@@ -100,34 +143,186 @@ const otpToggle = document.getElementById('otpToggle');
 const message = document.getElementById('message');
 const passwordInput = document.getElementById('password');
 const verificationCodeInput = document.getElementById('verificationCode');
+const verificationHint = document.getElementById('verificationHint');
+const verificationEmail = document.getElementById('verificationEmail');
+const emailInput = document.getElementById('email');
+const emailField = document.getElementById('emailField');
 const passwordField = document.getElementById('passwordField');
 const codeField = document.getElementById('codeField');
+const digitBoxes = [...document.querySelectorAll('.digit-box')];
 const oauthButtons = document.querySelectorAll('[data-provider]');
 let useEmailCode = false;
 let otpSent = false;
+let needsVerification = false;
+let pendingVerificationEmail = '';
+let pendingVerificationPassword = '';
+const pendingSignupEmailKey = 'thinktrail.pendingSignupEmail';
+
+function savePendingSignupEmail(email) {
+  try {
+    sessionStorage.setItem(pendingSignupEmailKey, email);
+  } catch {}
+}
+
+function clearPendingSignupEmail() {
+  try {
+    sessionStorage.removeItem(pendingSignupEmailKey);
+  } catch {}
+}
+
+function getPendingSignupEmail() {
+  try {
+    return sessionStorage.getItem(pendingSignupEmailKey) || '';
+  } catch {
+    return '';
+  }
+}
+
+function resetDefaultAuthState() {
+  isSignUp = false;
+  useEmailCode = false;
+  otpSent = false;
+  needsVerification = false;
+  pendingVerificationEmail = '';
+  pendingVerificationPassword = '';
+  switchText.textContent = 'New to ThinkTrail.AI?';
+  switchButton.textContent = 'Create an account';
+  passwordInput.autocomplete = 'current-password';
+  clearVerificationBoxes();
+  verificationHint.hidden = true;
+  codeField.hidden = true;
+  emailInput.required = true;
+  emailInput.disabled = false;
+  passwordField.hidden = false;
+  document.querySelector('.auth-shell')?.classList.remove('verification-ui');
+}
+
+function syncVerificationBoxes() {
+  const value = digitBoxes.map((box) => box.value.replace(/\D/g, '')).join('');
+  verificationCodeInput.value = value;
+}
+
+function clearVerificationBoxes() {
+  digitBoxes.forEach((box) => {
+    box.value = '';
+  });
+  syncVerificationBoxes();
+}
+
+function focusNextDigit(index) {
+  const next = digitBoxes[index + 1];
+  if (next) next.focus();
+}
+
+digitBoxes.forEach((box, index) => {
+  box.addEventListener('input', () => {
+    const value = box.value.replace(/\D/g, '').slice(-1);
+    box.value = value;
+    if (value && index < digitBoxes.length - 1) {
+      focusNextDigit(index);
+    }
+    syncVerificationBoxes();
+  });
+
+  box.addEventListener('keydown', (event) => {
+    if (event.key === 'Backspace' && !box.value && index > 0) {
+      const previous = digitBoxes[index - 1];
+      previous.value = '';
+      previous.focus();
+      syncVerificationBoxes();
+    }
+    if (event.key === 'ArrowLeft' && index > 0) {
+      digitBoxes[index - 1].focus();
+    }
+    if (event.key === 'ArrowRight' && index < digitBoxes.length - 1) {
+      digitBoxes[index + 1].focus();
+    }
+  });
+
+  box.addEventListener('paste', (event) => {
+    const pasted = (event.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 6);
+    if (!pasted) return;
+    event.preventDefault();
+    pasted.split('').forEach((digit, digitIndex) => {
+      if (digitBoxes[digitIndex]) {
+        digitBoxes[digitIndex].value = digit;
+      }
+    });
+    const finalIndex = Math.min(pasted.length, digitBoxes.length - 1);
+    digitBoxes[finalIndex].focus();
+    syncVerificationBoxes();
+  });
+});
 
 function updateAuthMode() {
-  const codeMode = useEmailCode;
-  passwordField.hidden = codeMode;
-  codeField.hidden = !codeMode;
-  passwordInput.required = !codeMode;
-  passwordInput.disabled = codeMode;
-  verificationCodeInput.required = codeMode;
+  const codeMode = !isSignUp && useEmailCode;
+  const verificationMode = needsVerification;
+  const compactVerification = codeMode || verificationMode;
+  const showPassword = !codeMode && !verificationMode;
+  const showCode = codeMode || verificationMode;
+
+  document.querySelector('.auth-shell')?.classList.toggle('verification-ui', compactVerification);
+  otpToggle.hidden = isSignUp || verificationMode;
+  emailField.hidden = verificationMode;
+  emailField.style.display = verificationMode ? 'none' : 'block';
+  emailInput.required = !verificationMode;
+  emailInput.disabled = verificationMode;
+  passwordField.hidden = !showPassword;
+  passwordField.style.display = showPassword ? 'block' : 'none';
+  codeField.hidden = !showCode;
+  codeField.style.display = showCode ? 'flex' : 'none';
+  verificationHint.hidden = !verificationMode;
+  verificationHint.style.display = verificationMode ? 'block' : 'none';
+  passwordInput.required = showPassword;
+  passwordInput.disabled = !showPassword;
+  verificationCodeInput.required = showCode;
   verificationCodeInput.value = '';
+  if (!showCode) {
+    clearVerificationBoxes();
+  }
+
+  if (verificationMode) {
+    title.textContent = 'Verify your account';
+    intro.textContent = 'Enter the 6-digit code.';
+    submitButton.textContent = 'Verify code';
+    otpToggle.textContent = 'Use email code instead';
+    verificationEmail.textContent = pendingVerificationEmail || 'your email';
+    clearVerificationBoxes();
+    passwordInput.value = '';
+    message.className = 'message';
+    message.textContent = '';
+    return;
+  }
+
+  if (isSignUp) {
+    title.textContent = 'Create your account.';
+    intro.textContent = 'Create a password to get started.';
+    submitButton.textContent = 'Create account';
+    otpToggle.textContent = 'Use email code instead';
+    useEmailCode = false;
+    otpSent = false;
+    passwordInput.value = '';
+    message.className = 'message';
+    message.textContent = '';
+    return;
+  }
 
   if (codeMode) {
     title.textContent = 'Check your email.';
     intro.textContent = 'Enter your email and we will send a 6-digit verification code.';
     submitButton.textContent = otpSent ? 'Verify code' : 'Send code';
     otpToggle.textContent = 'Use password instead';
+    clearVerificationBoxes();
     passwordInput.value = '';
   } else {
-    title.textContent = isSignUp ? 'Create your account.' : 'Welcome back.';
-    intro.textContent = isSignUp ? 'Create a password to get started.' : 'Sign in with your email and password.';
-    submitButton.textContent = isSignUp ? 'Create account' : 'Sign in';
+    title.textContent = 'Welcome back.';
+    intro.textContent = 'Sign in with your email and password.';
+    submitButton.textContent = 'Sign in';
     otpToggle.textContent = 'Use email code instead';
     otpSent = false;
+    clearVerificationBoxes();
   }
+  message.className = 'message';
   message.textContent = '';
 }
 
@@ -136,19 +331,19 @@ supabaseClient.auth.getSession().then(({ data: { session } }) => {
 });
 
 switchButton.addEventListener('click', () => {
+  needsVerification = false;
   isSignUp = !isSignUp;
-  if (!useEmailCode) {
-    title.textContent = isSignUp ? 'Create your account.' : 'Welcome back.';
-    intro.textContent = isSignUp ? 'Create a password to get started.' : 'Sign in with your email and password.';
-    submitButton.textContent = isSignUp ? 'Create account' : 'Sign in';
+  if (isSignUp) {
+    useEmailCode = false;
   }
   switchText.textContent = isSignUp ? 'Already have an account?' : 'New to ThinkTrail.AI?';
   switchButton.textContent = isSignUp ? 'Sign in' : 'Create an account';
   passwordInput.autocomplete = isSignUp ? 'new-password' : 'current-password';
-  message.textContent = '';
+  updateAuthMode();
 });
 
 otpToggle.addEventListener('click', () => {
+  if (isSignUp) return;
   useEmailCode = !useEmailCode;
   otpSent = false;
   updateAuthMode();
@@ -181,6 +376,51 @@ form.addEventListener('submit', async (event) => {
   submitButton.disabled = true;
   const email = document.getElementById('email').value.trim();
 
+  if (needsVerification) {
+    const token = verificationCodeInput.value.trim();
+    if (!token || token.length < 6) {
+      submitButton.disabled = false;
+      message.className = 'message error';
+      message.textContent = 'Enter the 6-digit verification code.';
+      return;
+    }
+
+    const { data, error } = await supabaseClient.auth.verifyOtp({
+      email: pendingVerificationEmail || email,
+      token,
+      type: 'signup'
+    });
+
+    submitButton.disabled = false;
+
+    if (error) {
+      message.className = 'message error';
+      message.textContent = error.message;
+      return;
+    }
+
+    if (data?.session) {
+      clearPendingSignupEmail();
+      window.location.href = '../';
+      return;
+    }
+
+    const signInResult = await supabaseClient.auth.signInWithPassword({
+      email: pendingVerificationEmail || email,
+      password: pendingVerificationPassword || passwordInput.value
+    });
+
+    if (signInResult.error) {
+      message.className = 'message error';
+      message.textContent = signInResult.error.message;
+      return;
+    }
+
+    clearPendingSignupEmail();
+    window.location.href = '../';
+    return;
+  }
+
   if (!email) {
     message.className = 'message error';
     message.textContent = 'Enter an email address.';
@@ -188,14 +428,14 @@ form.addEventListener('submit', async (event) => {
     return;
   }
 
-  if (useEmailCode) {
+  if (!isSignUp && useEmailCode) {
     const token = verificationCodeInput.value.trim();
 
     if (!otpSent) {
       const { error } = await supabaseClient.auth.signInWithOtp({
         email,
         options: {
-          shouldCreateUser: true,
+          shouldCreateUser: false,
           emailRedirectTo: new URL('../', window.location.href).href
         }
       });
@@ -253,9 +493,41 @@ form.addEventListener('submit', async (event) => {
 
   if (isSignUp) {
     result = await supabaseClient.auth.signUp({ email, password });
-  } else {
-    result = await supabaseClient.auth.signInWithPassword({ email, password });
+    if (result.error) {
+      submitButton.disabled = false;
+      message.className = 'message error';
+      message.textContent = result.error.message;
+      return;
+    }
+
+    submitButton.disabled = false;
+
+    if (!result.data?.session) {
+      needsVerification = true;
+      pendingVerificationEmail = email;
+      savePendingSignupEmail(email);
+      pendingVerificationPassword = password;
+      isSignUp = false;
+      switchText.textContent = 'New to ThinkTrail.AI?';
+      switchButton.textContent = 'Create an account';
+      form.reset();
+      passwordInput.value = '';
+      verificationCodeInput.value = '';
+      clearVerificationBoxes();
+      verificationEmail.textContent = email;
+      verificationHint.hidden = false;
+      switchButton.disabled = false;
+      updateAuthMode();
+      message.className = 'message';
+      message.textContent = 'Account created. Enter the 6-digit code we sent to your email to continue.';
+      return;
+    }
+
+    window.location.href = '../';
+    return;
   }
+
+  result = await supabaseClient.auth.signInWithPassword({ email, password });
 
   submitButton.disabled = false;
 
@@ -268,6 +540,12 @@ form.addEventListener('submit', async (event) => {
   window.location.href = '../';
 });
 
+const savedPendingSignupEmail = getPendingSignupEmail();
+resetDefaultAuthState();
+if (savedPendingSignupEmail) {
+  needsVerification = true;
+  pendingVerificationEmail = savedPendingSignupEmail;
+}
 updateAuthMode();
 </script>
 </body>
