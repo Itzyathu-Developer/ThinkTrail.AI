@@ -49,11 +49,11 @@ Deno.serve(async (request: Request) => {
     const generateGame = body.generateGame === true;
     const imageDataUrl = typeof body.imageDataUrl === "string" ? body.imageDataUrl : "";
     const history: Array<{ role: "user" | "assistant"; content: string }> = Array.isArray(body.history)
-      ? body.history.slice(-10).flatMap((turn: unknown) => {
+      ? body.history.slice(-6).flatMap((turn: unknown) => {
         if (!turn || typeof turn !== "object") return [];
         const item = turn as Record<string, unknown>;
         if ((item.role !== "user" && item.role !== "assistant") || typeof item.content !== "string") return [];
-        const content = item.content.trim().slice(0, 2000);
+        const content = item.content.trim().slice(0, 1200);
         return content ? [{ role: item.role, content }] : [];
       })
       : [];
@@ -224,8 +224,8 @@ Deno.serve(async (request: Request) => {
       },
       body: JSON.stringify({
         model: imageDataUrl ? groqVisionModel : groqModel,
-        temperature: generateGame ? 0.7 : 0.4,
-        max_tokens: generateGame ? 650 : 700,
+        temperature: generateGame ? 0.7 : 0.35,
+        max_tokens: generateGame ? 900 : 1200,
         ...(generateGame ? { response_format: { type: "json_object" } } : {}),
         messages: [
           {

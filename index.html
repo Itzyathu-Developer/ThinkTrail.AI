@@ -1828,10 +1828,24 @@ async function saveProfileSettings(){
   document.getElementById("profileDialog").close();
 }
 
+function resetSubjectConversation(){
+  conversationHistory.length = 0;
+  const chat = document.getElementById("chat");
+  if (chat) chat.replaceChildren();
+  const questionInput = document.getElementById("question");
+  if (questionInput) questionInput.value = "";
+  removeStudyPhoto();
+}
+
 function selectSubject(button, subject){
   document.querySelectorAll(".subject").forEach(x => x.classList.remove("active"));
   button.classList.add("active");
-  currentSubject = subject;
+  if (currentSubject !== subject) {
+    currentSubject = subject;
+    resetSubjectConversation();
+  } else {
+    currentSubject = subject;
+  }
   document.getElementById("subjectLabel").textContent = "Ready to help with " + subject;
 }
 
@@ -2071,7 +2085,7 @@ async function sendMessage(){
   const imageDataUrl = selectedImageDataUrl;
   if(!typedQuestion && !imageDataUrl) return;
   const text = typedQuestion || "Please help me understand this study photo.";
-  const history = conversationHistory.slice(-10);
+  const history = conversationHistory.slice(-6);
 
   addMessage(text, "user", imageDataUrl);
   input.value = "";
@@ -2094,11 +2108,12 @@ async function sendMessage(){
     return;
   }
 
+  const assistantContext = data.answer.trim().slice(0, 1200);
   conversationHistory.push(
     { role: "user", content: imageDataUrl ? `${text} [A study photo was attached.]` : text },
-    { role: "assistant", content: data.answer }
+    { role: "assistant", content: assistantContext }
   );
-  if(conversationHistory.length > 10) conversationHistory.splice(0, conversationHistory.length - 10);
+  if(conversationHistory.length > 12) conversationHistory.splice(0, conversationHistory.length - 12);
   try {
     await recordStudyActivity(5);
   } catch (progressError) {

@@ -69,12 +69,17 @@ button:disabled{opacity:.65;cursor:wait;transform:none;box-shadow:none;}
         <label for="email">Email</label>
         <input id="email" type="email" autocomplete="email" required>
       </div>
-      <div class="form-field">
+      <div class="form-field" id="passwordField">
         <label for="password">Password</label>
         <input id="password" type="password" autocomplete="current-password" minlength="6" required>
       </div>
+      <div class="form-field" id="codeField" hidden>
+        <label for="verificationCode">6-digit code</label>
+        <input id="verificationCode" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*" placeholder="123456">
+      </div>
       <button id="submitButton" type="submit">Sign in</button>
     </form>
+    <p class="switch"><button id="otpToggle" type="button">Use email code instead</button></p>
     <div class="oauth-divider">or continue with</div>
     <div class="oauth-buttons">
       <button class="oauth-button" type="button" data-provider="google">Continue with Google</button>
@@ -91,9 +96,40 @@ const intro = document.getElementById('intro');
 const submitButton = document.getElementById('submitButton');
 const switchText = document.getElementById('switchText');
 const switchButton = document.getElementById('switchButton');
+const otpToggle = document.getElementById('otpToggle');
 const message = document.getElementById('message');
 const passwordInput = document.getElementById('password');
+const verificationCodeInput = document.getElementById('verificationCode');
+const passwordField = document.getElementById('passwordField');
+const codeField = document.getElementById('codeField');
 const oauthButtons = document.querySelectorAll('[data-provider]');
+let useEmailCode = false;
+let otpSent = false;
+
+function updateAuthMode() {
+  const codeMode = useEmailCode;
+  passwordField.hidden = codeMode;
+  codeField.hidden = !codeMode;
+  passwordInput.required = !codeMode;
+  passwordInput.disabled = codeMode;
+  verificationCodeInput.required = codeMode;
+  verificationCodeInput.value = '';
+
+  if (codeMode) {
+    title.textContent = 'Check your email.';
+    intro.textContent = 'Enter your email and we will send a 6-digit verification code.';
+    submitButton.textContent = otpSent ? 'Verify code' : 'Send code';
+    otpToggle.textContent = 'Use password instead';
+    passwordInput.value = '';
+  } else {
+    title.textContent = isSignUp ? 'Create your account.' : 'Welcome back.';
+    intro.textContent = isSignUp ? 'Create a password to get started.' : 'Sign in with your email and password.';
+    submitButton.textContent = isSignUp ? 'Create account' : 'Sign in';
+    otpToggle.textContent = 'Use email code instead';
+    otpSent = false;
+  }
+  message.textContent = '';
+}
 
 supabaseClient.auth.getSession().then(({ data: { session } }) => {
   if (session) window.location.href = '../';
@@ -101,13 +137,21 @@ supabaseClient.auth.getSession().then(({ data: { session } }) => {
 
 switchButton.addEventListener('click', () => {
   isSignUp = !isSignUp;
-  title.textContent = isSignUp ? 'Create your account.' : 'Welcome back.';
-  intro.textContent = isSignUp ? 'Create a password to get started.' : 'Sign in with your email and password.';
-  submitButton.textContent = isSignUp ? 'Create account' : 'Sign in';
+  if (!useEmailCode) {
+    title.textContent = isSignUp ? 'Create your account.' : 'Welcome back.';
+    intro.textContent = isSignUp ? 'Create a password to get started.' : 'Sign in with your email and password.';
+    submitButton.textContent = isSignUp ? 'Create account' : 'Sign in';
+  }
   switchText.textContent = isSignUp ? 'Already have an account?' : 'New to ThinkTrail.AI?';
   switchButton.textContent = isSignUp ? 'Sign in' : 'Create an account';
   passwordInput.autocomplete = isSignUp ? 'new-password' : 'current-password';
   message.textContent = '';
+});
+
+otpToggle.addEventListener('click', () => {
+  useEmailCode = !useEmailCode;
+  otpSent = false;
+  updateAuthMode();
 });
 
 oauthButtons.forEach((button) => {
@@ -136,6 +180,74 @@ form.addEventListener('submit', async (event) => {
   message.textContent = 'Working...';
   submitButton.disabled = true;
   const email = document.getElementById('email').value.trim();
+
+  if (!email) {
+    message.className = 'message error';
+    message.textContent = 'Enter an email address.';
+    submitButton.disabled = false;
+    return;
+  }
+
+  if (useEmailCode) {
+    const token = verificationCodeInput.value.trim();
+
+    if (!otpSent) {
+      const { error } = await supabaseClient.auth.signInWithOtp({
+        email,
+        options: {
+          shouldCreateUser: true,
+          emailRedirectTo: new URL('../', window.location.href).href
+        }
+      });
+
+      submitButton.disabled = false;
+      if (error) {
+        message.className = 'message error';
+        message.textContent = error.message;
+        return;
+      }
+
+      otpSent = true;
+      submitButton.textContent = 'Verify code';
+      codeField.hidden = false;
+      verificationCodeInput.focus();
+      message.textContent = 'A 6-digit code has been sent to your email.';
+      return;
+    }
+
+    if (!token || token.length < 6) {
+      submitButton.disabled = false;
+      message.className = 'message error';
+      message.textContent = 'Enter the 6-digit code from your email.';
+      return;
+    }
+
+    const { data, error } = await supabaseClient.auth.verifyOtp({
+      email,
+      token,
+      type: 'email'
+    });
+
+    submitButton.disabled = false;
+
+    if (error) {
+      message.className = 'message error';
+      message.textContent = error.message;
+      return;
+    }
+
+    if (data?.session) {
+      window.location.href = '../';
+      return;
+    }
+
+    message.className = 'message error';
+    message.textContent = 'The verification code did not work. Try sending a new code.';
+    otpSent = false;
+    submitButton.textContent = 'Send code';
+    return;
+  }
+
   const password = passwordInput.value;
   let result;
 
@@ -155,6 +267,8 @@ form.addEventListener('submit', async (event) => {
 
   window.location.href = '../';
 });
+
+updateAuthMode();
 </script>
 </body>
 </html>
