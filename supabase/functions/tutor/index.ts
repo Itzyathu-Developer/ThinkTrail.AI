@@ -7,6 +7,13 @@ const corsHeaders = {
 const supportedSubjects = new Set(["Math", "Science", "English", "History", "Languages", "Other"]);
 const supportedModes = new Set(["Learn", "Practice", "Game", "Quiz"]);
 const supportedChallengeTypes = new Set(["multiple_choice", "true_false", "finish_the_step", "spot_the_mistake"]);
+const subjectTopicPatterns: Array<[string, RegExp]> = [
+  ["Languages", /\b(?:hindi|sanskrit|spanish|french|german|mandarin|japanese|arabic|translation|translate|vocabulary|conjugat\w*)\b/i],
+  ["Science", /\b(?:science|biology|physics|chemistry|reproduction|photosynthesis|ecosystem|cellular?|organism|gravity|atom|molecule|periodic\s+table|mitosis|meiosis|respiration)\b/i],
+  ["English", /\b(?:english|literature|poetry|poem|metaphor|simile|essay|paragraph|noun|pronoun|adjective|adverb|verb|punctuation)\b/i],
+  ["History", /\b(?:history|historical|civilization|ancient\s+(?:egypt|rome|greece)|empire|revolution|independence|dynasty)\b/i],
+  ["Math", /\b(?:math(?:ematics)?|algebra|geometry|calculus|trigonometry|arithmetic|equation|fraction|decimal|percentage|probability|平方|solve\s+for|square\s+root)\b/i]
+];
 const sexualTopicPattern = /\b(?:sex|sexual|porn(?:ography)?|nudes?|naked|erotic|orgasm|masturbat\w*|intercourse)\b/i;
 const sourceLookupPattern = /\b(?:source|sources|cite|citation|citations|reference|references|internet|online|web|textbook|ncert|page\s*(?:no\.?|number)?\s*\d+|according\s+to)\b/i;
 
@@ -90,6 +97,15 @@ Deno.serve(async (request: Request) => {
       return jsonResponse({
         answer: "I can help with school subjects and study questions, but not sexual topics. Try asking about another subject."
       });
+    }
+
+    if (!generateGame && !imageDataUrl) {
+      const questionSubject = subjectTopicPatterns.find(([, pattern]) => pattern.test(question))?.[0];
+      if (questionSubject && questionSubject !== subject) {
+        return jsonResponse({
+          answer: `That is a ${questionSubject} topic. Select ${questionSubject} above to get help with it.`
+        });
+      }
     }
 
     if (imageDataUrl && (!/^data:image\/jpeg;base64,[A-Za-z0-9+/]+={0,2}$/.test(imageDataUrl) || imageDataUrl.length > 2_850_000)) {
